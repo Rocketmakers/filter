@@ -1,0 +1,61 @@
+name: Deploy registry (manual)
+
+# Manual trigger only — for testing the Pages plumbing or shipping a hotfix
+# of the registry without cutting a release. Normal releases use release.yml's
+# `deploy-registry` job, which only fires after a Changesets release.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build registry
+        run: pnpm build:registry
+
+      - name: Add landing page
+        run: |
+          cat > registry-dist/index.html <<'HTML'
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>filter-builder registry</title></head>
+          <body style="font-family:system-ui;max-width:42rem;margin:4rem auto;padding:0 1rem;line-height:1.55">
+          <h1>filter-builder shadcn registry</h1>
+          <p>Install a variant with:</p>
+          <pre><code>npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-tailwind.json</code></pre>
+          <p>Replace the trailing slug with <code>filter-builder-mantine</code> or <code>filter-builder-stylex</code>.</p>
+          <p><a href="https://github.com/Rocketmakers/filter">Source on GitHub</a></p>
+          </body></html>
+          HTML
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: registry-dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
