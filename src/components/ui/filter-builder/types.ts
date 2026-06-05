@@ -270,7 +270,16 @@ export type FilterBaseConfig = {
 // Per-type configs (discriminated union via `type`)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type FilterTextConfig = FilterBaseConfig & { type: "text" };
+export type FilterTextConfig = FilterBaseConfig & {
+  type: "text";
+  /**
+   * Async lookup for suggestions while the user is typing. The backend
+   * decides ranking & cut-off; the renderer just shows what it gets back
+   * (capped at 10). When omitted, the renderer only offers free-text
+   * commit + any `customOptions`.
+   */
+  filterSearch?: (searchTerm: string) => Promise<FilterBaseOption<string>[]>;
+};
 
 export type FilterNumberConfig = FilterBaseConfig & {
   type: "number";

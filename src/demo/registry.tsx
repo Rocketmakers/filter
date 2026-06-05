@@ -16,10 +16,12 @@ import type {
   FilterOptionRegistry,
 } from "@/components/ui/filter-builder";
 
-import { DEPARTMENTS, SKILLS, type Department, type Skill } from "./employees";
-
-const matchesTerm = (haystack: string, term: string) =>
-  haystack.toLowerCase().includes(term.toLowerCase());
+import { type Department, type Skill } from "./employees";
+import {
+  searchDepartments,
+  searchSkills,
+  searchSuggestions,
+} from "./suggestions-api";
 
 const departmentToOption = (
   dept: Department
@@ -89,12 +91,14 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
     label: "Name",
     type: "text",
     icon: <UserIcon />,
+    filterSearch: (term) => searchSuggestions("name", term),
   },
   {
     name: "email",
     label: "Email",
     type: "text",
     icon: <AtSignIcon />,
+    filterSearch: (term) => searchSuggestions("email", term),
   },
   {
     name: "department",
@@ -102,8 +106,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
     type: "select",
     icon: <BuildingIcon />,
     multiple: true,
-    filterSearch: async (term: string) =>
-      DEPARTMENTS.filter((d) => matchesTerm(d.name, term)),
+    filterSearch: searchDepartments,
     mapToFilterOption: departmentToOption,
     filterOptionRenderer: (opt) => <span>{opt.label}</span>,
     filterSingleOptionRenderer: (vals) => <Badge>{vals[0]?.label}</Badge>,
@@ -124,8 +127,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
     multiple: true,
     // skills is itself an array on the row, so we ask for CONTAINS semantics
     multipleValues: true,
-    filterSearch: async (term: string) =>
-      SKILLS.filter((s) => matchesTerm(s.name, term)),
+    filterSearch: searchSkills,
     mapToFilterOption: skillToOption,
     filterOptionRenderer: (opt) => <span>{opt.label}</span>,
     filterSingleOptionRenderer: (vals) => <Badge>{vals[0]?.label}</Badge>,
@@ -143,6 +145,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
     label: "Role",
     type: "text",
     icon: <WrenchIcon />,
+    filterSearch: (term) => searchSuggestions("role", term),
   },
   {
     name: "salary",

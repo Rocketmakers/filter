@@ -1,6 +1,6 @@
 # filter-builder
 
-A shadcn-style, copy-paste filter builder for React + Tailwind + Radix.
+Filter builder for React + Tailwind + Radix.
 
 Generic over the row type, supports six data types (`text`, `number`, `boolean`,
 `select`, `date`, `dateTime`), natural-language date parsing via `chrono-node`,
@@ -110,10 +110,10 @@ type Order = {
 };
 
 const orderFilters: FilterOptionRegistry = [
-  { name: "customer", label: "Customer", type: "select", /* ... */ },
-  { name: "total",    label: "Total",    type: "number" },
-  { name: "placedAt", label: "Placed",   type: "date" },
-  { name: "paid",     label: "Paid",     type: "boolean" },
+  { name: "customer", label: "Customer", type: "select" /* ... */ },
+  { name: "total", label: "Total", type: "number" },
+  { name: "placedAt", label: "Placed", type: "date" },
+  { name: "paid", label: "Paid", type: "boolean" },
 ];
 
 function OrdersPage({ orders }: { orders: Order[] }) {
