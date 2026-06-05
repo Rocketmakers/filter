@@ -1,13 +1,14 @@
 # filter-builder
 
 Three flavours of the same compound `FilterBuilder` component, each in its own
-package. All shadcn-style: copy the source into your app, no library dep.
+package. Copy the source into your app — no library dependency, no runtime
+wrapper.
 
-| Package | Styling stack | Port | Dir |
-| --- | --- | --- | --- |
-| `@filter-builder/tailwind` | Tailwind v4 + Radix + cmdk | 5173 | [`packages/tailwind`](packages/tailwind) |
-| `@filter-builder/mantine` | Mantine v8 + SCSS modules | 5174 | [`packages/mantine`](packages/mantine) |
-| `@filter-builder/stylex` | StyleX + Radix + cmdk | 5175 | [`packages/stylex`](packages/stylex) |
+| Package | Styling stack | Install path | Port | Dir |
+| --- | --- | --- | --- | --- |
+| `@filter-builder/tailwind` | Tailwind v4 + Radix + cmdk | `shadcn` registry | 5173 | [`packages/tailwind`](packages/tailwind) |
+| `@filter-builder/mantine` | Mantine v8 + SCSS modules | `@rocketmakers/filter` CLI | 5174 | [`packages/mantine`](packages/mantine) |
+| `@filter-builder/stylex` | StyleX + Radix + cmdk | `@rocketmakers/filter` CLI | 5175 | [`packages/stylex`](packages/stylex) |
 
 Every variant supports six filter types (`text`, `number`, `boolean`, `select`,
 `date`, `dateTime`), natural-language date parsing, async option search,
@@ -16,30 +17,36 @@ multi-select with auto-condition switching, lockable pills, and a client-side
 
 ## Adding it to your app
 
-The fastest path is the shadcn CLI — the repo publishes a registry to GitHub
-Pages on every release. Pick the variant whose styling stack matches yours:
+### Tailwind — shadcn registry
+
+The Tailwind variant ships as a [shadcn](https://ui.shadcn.com) registry block,
+so it slots into any shadcn-configured project:
 
 ```sh
 npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-tailwind.json
-# or
-npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-mantine.json
-# or
-npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-stylex.json
 ```
 
-That drops the `filter-builder/` compound, the sibling primitives it needs,
-the `lib/` helpers, and (for Mantine/StyleX) the theme/token files into the
-paths configured in your `components.json`. Then install the npm dependencies
-the CLI prints and wire the required providers at your app root
-(`TooltipProvider` for Tailwind; `MantineProvider` + `DatesProvider` +
-`Notifications` for Mantine; the StyleX `ThemeProvider` for dark mode). Each
-package's `src/main.tsx` in this repo shows the exact setup.
+The shadcn CLI handles dependencies, file targets, and `components.json` for
+you. After it runs, wrap your app in `TooltipProvider` (from
+`@/components/ui/tooltip`) and mount `<Toaster />` from `sonner`. See
+[`packages/tailwind/src/main.tsx`](packages/tailwind/src/main.tsx) for the
+exact setup.
 
-### Manual copy-paste (no CLI)
+### Mantine / StyleX — `@rocketmakers/filter` CLI
 
-If you'd rather not run the CLI, the registry is just JSON — open one of the
-URLs above and the `files` array tells you exactly which files to copy and
-where they should land. Same effect, more typing.
+The Mantine and StyleX variants don't assume any shadcn config — they ship
+through a one-shot installer:
+
+```sh
+npx @rocketmakers/filter mantine
+# or
+npx @rocketmakers/filter stylex
+```
+
+The CLI drops the source under `src/`, installs the npm dependencies with
+whichever package manager your project uses (pnpm / yarn / bun / npm), and
+prints the provider-wiring snippet for the variant. Run with `--help` to see
+all options (`--cwd`, `--force`, `--no-install`).
 
 ## Usage
 

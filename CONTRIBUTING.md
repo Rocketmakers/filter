@@ -101,9 +101,16 @@ It does not pull a runtime dependency, just calls the AI provider's HTTP API
 
 ## Releases
 
-Distribution is a shadcn registry hosted on GitHub Pages — not npm. The
-release flow uses [Changesets](https://github.com/changesets/changesets) for
-versioning and CHANGELOG generation, and GitHub Actions for everything else.
+Distribution is split across two surfaces:
+
+- The **Tailwind variant** ships as a shadcn registry hosted on GitHub Pages
+  (`registry-dist/r/*.json`).
+- The **Mantine and StyleX variants** ship via [`@rocketmakers/filter`](packages/cli)
+  on npm — a thin CLI that fetches the same registry manifests at runtime.
+
+The release flow uses [Changesets](https://github.com/changesets/changesets)
+for versioning and CHANGELOG generation, and GitHub Actions for everything
+else.
 
 ### What you do as a contributor
 
@@ -158,15 +165,18 @@ push to `main`:
 
 1. **`changesets/action`** consumes any pending `.changeset/*.md` files. If
    there are any, it opens (or updates) a **"chore: release"** PR that bumps
-   `version` in the three package.jsons and rewrites `CHANGELOG.md`. Nothing
-   is published yet.
+   `version` in the package.jsons and rewrites `CHANGELOG.md`. Nothing is
+   published yet.
 2. **Merging that release PR** triggers the workflow again. This time
-   `changesets/action` sees no pending changesets but a fresh version, so it
-   tags the commit (`v1.2.3`), creates a GitHub Release with the changelog,
-   and sets `published=true`.
+   `changesets/action` runs `changeset publish`, which:
+   - publishes `@rocketmakers/filter` to npm (the only non-private package);
+   - tags every package — including the private `@filter-builder/*` demos —
+     and creates a GitHub Release with the changelog;
+   - sets `published=true`.
 3. **`deploy-registry`** then runs `pnpm build:registry` and publishes the
-   `registry-dist/` JSON files to GitHub Pages. The URLs in [README.md](README.md)
-   are now serving the new version.
+   `registry-dist/` JSON files to GitHub Pages. The shadcn registry URL in
+   [README.md](README.md) and the manifests the CLI fetches are now serving
+   the new version.
 
 CI on PRs ([`ci.yml`](.github/workflows/ci.yml)) lints, builds the packages,
 and builds the registry — so a broken `registry.json` blocks the PR before it
@@ -179,9 +189,32 @@ For the workflows to work, the repo needs (in **Settings → Actions → General
 - "Workflow permissions" set to **Read and write**
 - "Allow GitHub Actions to create and approve pull requests" **enabled**
 
-And in **Settings → Pages**, set the source to **GitHub Actions** (not a branch).
+In **Settings → Pages**, set the source to **GitHub Actions** (not a branch).
 
-No npm token is needed — we don't publish to npm.
+### One-time npm setup (Trusted Publishing — no token)
+
+`@rocketmakers/filter` publishes via [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers),
+which uses GitHub Actions OIDC to mint a short-lived publish credential at
+release time. There is no long-lived `NPM_TOKEN` secret to manage or rotate.
+
+To activate it for a fresh package, you need to:
+
+1. **Publish the first version manually** (one time only) so the package
+   exists on npmjs.com:
+   ```sh
+   cd packages/cli && pnpm build && npm publish --provenance
+   ```
+2. On [npmjs.com → Package settings → Trusted Publishers](https://docs.npmjs.com/trusted-publishers#configuring-a-trusted-publisher),
+   add a GitHub Actions trusted publisher:
+   - **Organization or user**: `Rocketmakers`
+   - **Repository**: `filter`
+   - **Workflow filename**: `release.yml`
+   - **Environment**: *(leave blank)*
+
+Once configured, every subsequent release runs straight through GHA —
+`changeset publish` exchanges the job's OIDC token for a short-lived
+publish credential automatically. (Node 25, pinned in the workflows, ships
+npm 11.x which handles the OIDC exchange natively.)
 
 ### Touching the registry manifest
 

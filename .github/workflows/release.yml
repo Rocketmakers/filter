@@ -32,21 +32,30 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 25.7.0
           cache: pnpm
+          registry-url: "https://registry.npmjs.org"
 
+      # No NPM_TOKEN secret is involved — the workflow's `id-token: write`
+      # permission (declared at workflow scope above) plus a trusted-publisher
+      # entry on npmjs.com is what authorises the publish. Node 25 ships
+      # npm 11.x which speaks the OIDC exchange natively.
       - name: Install
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
         run: pnpm build
 
-      - name: Changesets — version PR or tag
+      - name: Changesets — version PR, publish public, tag private
         id: changesets
         uses: changesets/action@v1
         with:
+          # `changeset publish` publishes any non-private packages to npm
+          # (currently just @rocketmakers/filter, with provenance enabled
+          # via its publishConfig) and tags every package — including the
+          # private @filter-builder/* demos — for GitHub Releases.
           version: pnpm changeset:version
-          publish: pnpm changeset:tag
+          publish: pnpm changeset:publish
           commit: "chore: release"
           title: "chore: release"
           createGithubReleases: true
@@ -72,7 +81,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 25.7.0
           cache: pnpm
 
       - name: Install
@@ -87,10 +96,17 @@ jobs:
           <!doctype html>
           <html><head><meta charset="utf-8"><title>filter-builder registry</title></head>
           <body style="font-family:system-ui;max-width:42rem;margin:4rem auto;padding:0 1rem;line-height:1.55">
-          <h1>filter-builder shadcn registry</h1>
-          <p>Install a variant with:</p>
+          <h1>filter-builder</h1>
+          <p>Three flavours of the same compound <code>FilterBuilder</code> component.</p>
+
+          <h2>Tailwind (shadcn registry)</h2>
           <pre><code>npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-tailwind.json</code></pre>
-          <p>Replace the trailing slug with <code>filter-builder-mantine</code> or <code>filter-builder-stylex</code>.</p>
+
+          <h2>Mantine or StyleX</h2>
+          <pre><code>npx @rocketmakers/filter mantine
+          npx @rocketmakers/filter stylex</code></pre>
+          <p>The CLI fetches the matching manifest from this site, writes the source into your <code>src/</code>, and installs the npm dependencies.</p>
+
           <p><a href="https://github.com/Rocketmakers/filter">Source on GitHub</a></p>
           </body></html>
           HTML

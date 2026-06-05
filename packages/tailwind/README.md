@@ -46,6 +46,16 @@ src/components/ui/filter-builder/
 
 ## Installing into a consuming app
 
+The fastest path is the published shadcn registry:
+
+```sh
+npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-tailwind.json
+```
+
+That drops every file listed below and installs the runtime dependencies in
+one shot. The sections that follow describe the same thing if you'd rather
+copy by hand.
+
 ### 1. Required shadcn primitives
 
 The filter-builder consumes these shadcn-style primitives from

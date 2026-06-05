@@ -81,19 +81,18 @@ diff on the styling layer only.
 
 ## Installing into a consuming app
 
-Drop `src/components/ui/`, `src/lib/`, `src/tokens.stylex.ts`, `src/themes.stylex.ts`
-into your app. Install:
+One command in your project root:
 
 ```sh
-pnpm add @stylexjs/stylex @radix-ui/react-popover @radix-ui/react-dropdown-menu \
-         @radix-ui/react-tooltip @radix-ui/react-checkbox @radix-ui/react-label \
-         @radix-ui/react-slot @radix-ui/react-context @radix-ui/react-dialog \
-         cmdk chrono-node date-fns react-day-picker lucide-react sonner lodash
-pnpm add -D @stylexjs/unplugin
+npx @rocketmakers/filter stylex
 ```
 
-Wire `@stylexjs/unplugin` into your Vite config **before** `@vitejs/plugin-react`
-to preserve Fast Refresh:
+The [`@rocketmakers/filter`](../cli) CLI drops `src/components/ui/`,
+`src/lib/`, `src/tokens.stylex.ts`, and `src/themes.stylex.ts` into your app,
+then installs the runtime + dev dependencies with whichever package manager
+your project uses. After it runs, wrap your app in `<ThemeProvider>` (from
+`./lib/theme`) and wire `@stylexjs/unplugin` into your bundler **before**
+`@vitejs/plugin-react` to preserve Fast Refresh:
 
 ```ts
 import stylex from "@stylexjs/unplugin";
@@ -103,4 +102,20 @@ export default defineConfig({
     react(),
   ],
 });
+```
+
+See [`src/main.tsx`](src/main.tsx) for the exact provider setup.
+
+### Manual install (no CLI)
+
+If you'd rather skip the CLI, copy the files listed under `files` in
+`https://rocketmakers.github.io/filter/r/filter-builder-stylex.json` and
+install these deps yourself:
+
+```sh
+pnpm add @stylexjs/stylex @radix-ui/react-popover @radix-ui/react-dropdown-menu \
+         @radix-ui/react-tooltip @radix-ui/react-checkbox @radix-ui/react-label \
+         @radix-ui/react-slot @radix-ui/react-context @radix-ui/react-dialog \
+         cmdk chrono-node date-fns react-day-picker lucide-react sonner lodash
+pnpm add -D @stylexjs/unplugin
 ```

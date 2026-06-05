@@ -27,6 +27,15 @@ importers:
         specifier: ~6.0.2
         version: 6.0.3
 
+  packages/cli:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.12.3
+        version: 24.13.0
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+
   packages/mantine:
     dependencies:
       '@mantine/core':

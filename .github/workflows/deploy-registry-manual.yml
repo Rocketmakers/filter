@@ -17,6 +17,11 @@ permissions:
 
 jobs:
   deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -28,7 +33,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 25.7.0
           cache: pnpm
 
       - name: Install
@@ -43,10 +48,17 @@ jobs:
           <!doctype html>
           <html><head><meta charset="utf-8"><title>filter-builder registry</title></head>
           <body style="font-family:system-ui;max-width:42rem;margin:4rem auto;padding:0 1rem;line-height:1.55">
-          <h1>filter-builder shadcn registry</h1>
-          <p>Install a variant with:</p>
+          <h1>filter-builder</h1>
+          <p>Three flavours of the same compound <code>FilterBuilder</code> component.</p>
+
+          <h2>Tailwind (shadcn registry)</h2>
           <pre><code>npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-tailwind.json</code></pre>
-          <p>Replace the trailing slug with <code>filter-builder-mantine</code> or <code>filter-builder-stylex</code>.</p>
+
+          <h2>Mantine or StyleX</h2>
+          <pre><code>npx @rocketmakers/filter mantine
+          npx @rocketmakers/filter stylex</code></pre>
+          <p>The CLI fetches the matching manifest from this site, writes the source into your <code>src/</code>, and installs the npm dependencies.</p>
+
           <p><a href="https://github.com/Rocketmakers/filter">Source on GitHub</a></p>
           </body></html>
           HTML

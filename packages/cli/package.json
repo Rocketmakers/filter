@@ -1,0 +1,40 @@
+{
+  "name": "@rocketmakers/filter",
+  "version": "0.0.0",
+  "description": "One-shot installer for the FilterBuilder compound component (Mantine and StyleX variants).",
+  "type": "module",
+  "bin": {
+    "filter": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node -e \"import('node:fs').then(({chmodSync}) => chmodSync('dist/index.js', 0o755))\"",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.3",
+    "typescript": "~6.0.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rocketmakers/filter.git",
+    "directory": "packages/cli"
+  },
+  "keywords": [
+    "filter-builder",
+    "mantine",
+    "stylex",
+    "rocketmakers"
+  ],
+  "license": "MIT"
+}

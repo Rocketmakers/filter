@@ -15,6 +15,7 @@
     "changeset": "changeset",
     "changeset:version": "changeset version && pnpm install --lockfile-only",
     "changeset:tag": "changeset tag",
+    "changeset:publish": "changeset publish",
     "prepare": "husky"
   },
   "devDependencies": {

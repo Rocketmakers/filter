@@ -61,20 +61,35 @@ file touching cmdk.
 
 ## Installing into a consuming app
 
-Drop `src/components/ui/filter-builder/`, the primitives in `src/components/ui/`,
-`src/lib/class-names.ts`, and `src/theme/brand.scss` into your app. Install:
+One command in your project root:
 
 ```sh
-pnpm add @mantine/core @mantine/dates @mantine/hooks @mantine/notifications \
-         @radix-ui/react-context cmdk chrono-node date-fns lodash lucide-react
+npx @rocketmakers/filter mantine
 ```
 
-Wire `MantineProvider`, `DatesProvider`, and `<Notifications />` at your app
-root (see `src/main.tsx`). Import the CSS:
+The [`@rocketmakers/filter`](../cli) CLI drops `src/components/ui/filter-builder/`,
+the Mantine primitives, `src/lib/class-names.ts`, and the `src/theme/` SCSS
+into your app, then installs the runtime + dev dependencies with whichever
+package manager your project uses. After it runs, wire `MantineProvider`,
+`DatesProvider`, and `<Notifications />` at your app root and import the CSS:
 
 ```ts
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 import "./theme/globals.scss";  // imports brand.scss
+```
+
+See [`src/main.tsx`](src/main.tsx) for the exact provider setup.
+
+### Manual install (no CLI)
+
+If you'd rather skip the CLI, copy the files listed under `files` in
+`https://rocketmakers.github.io/filter/r/filter-builder-mantine.json` and
+install these deps yourself:
+
+```sh
+pnpm add @mantine/core @mantine/dates @mantine/hooks @mantine/notifications \
+         @radix-ui/react-context cmdk chrono-node date-fns lodash lucide-react
+pnpm add -D @types/lodash sass postcss postcss-preset-mantine postcss-simple-vars
 ```
