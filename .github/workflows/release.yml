@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  pages: write
+
+jobs:
+  # 1. Changesets bot keeps a "Version Packages" PR open. Merging it
+  #    bumps versions, writes CHANGELOG.md, tags, and emits a GitHub Release.
+  release:
+    name: Version or release
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Changesets — version PR or tag
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset:version
+          publish: pnpm changeset:tag
+          commit: "chore: release"
+          title: "chore: release"
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 2. After a release is cut (or on every push if you'd rather track main),
+  #    rebuild the shadcn registry and deploy it to GitHub Pages.
+  deploy-registry:
+    name: Deploy registry to GitHub Pages
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build registry
+        run: pnpm build:registry
+
+      - name: Add landing page
+        run: |
+          cat > registry-dist/index.html <<'HTML'
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>filter-builder registry</title></head>
+          <body style="font-family:system-ui;max-width:42rem;margin:4rem auto;padding:0 1rem;line-height:1.55">
+          <h1>filter-builder shadcn registry</h1>
+          <p>Install a variant with:</p>
+          <pre><code>npx shadcn@latest add https://rocketmakers.github.io/filter/r/filter-builder-tailwind.json</code></pre>
+          <p>Replace the trailing slug with <code>filter-builder-mantine</code> or <code>filter-builder-stylex</code>.</p>
+          <p><a href="https://github.com/Rocketmakers/filter">Source on GitHub</a></p>
+          </body></html>
+          HTML
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: registry-dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

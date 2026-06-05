@@ -98,3 +98,94 @@ codemod watches.
 The `.robo-codemod/` folder is **your code**, shadcn-style — modify it freely.
 It does not pull a runtime dependency, just calls the AI provider's HTTP API
 (or spawns `claude -p` for Claude CLI).
+
+## Releases
+
+Distribution is a shadcn registry hosted on GitHub Pages — not npm. The
+release flow uses [Changesets](https://github.com/changesets/changesets) for
+versioning and CHANGELOG generation, and GitHub Actions for everything else.
+
+### What you do as a contributor
+
+Nothing, in the happy path. Open a PR with [Conventional Commit](https://www.conventionalcommits.org/)
+subjects (cz-ai already produces these) and the
+[`auto-changeset`](.github/workflows/auto-changeset.yml) workflow generates
+and commits a `.changeset/auto-pr-<N>.md` to your branch on every push.
+
+Bump level is inferred from the commits between your branch and `main`:
+
+| Commit shape | Bump |
+| --- | --- |
+| `feat!: …` or any commit body with `BREAKING CHANGE:` | major |
+| `feat: …` | minor |
+| `fix: …`, `perf: …` | patch |
+| `docs:`, `chore:`, `style:`, `test:`, `ci:`, `build:`, `refactor:`, anything else | none (no changeset) |
+
+The highest bump across all commits on the branch wins, and the changeset
+summary is the concatenated list of qualifying commit subjects — which
+becomes the `CHANGELOG.md` entry verbatim.
+
+### Overriding the bot
+
+If the auto-inference is wrong (e.g. you want to ship a `refactor:` as a
+minor for some reason, or rewrite the changelog note), drop your own
+changeset:
+
+```sh
+pnpm changeset
+```
+
+The bot **only writes when no other `.changeset/*.md` exists** for the PR.
+A manual changeset shuts it up.
+
+### PRs from forks
+
+The auto-changeset workflow no-ops on forked PRs — the default
+`GITHUB_TOKEN` can't push back to a fork branch. Fork contributors should
+run `pnpm changeset` locally and commit the result, or a maintainer can add
+one before merge.
+
+### Non-shipping PRs
+
+Pure docs / CI / `.robo-*/` changes won't trigger a changeset (no
+qualifying commit types). They'll merge without opening a release PR,
+which is correct — they shouldn't ship a version.
+
+### What happens after merge to `main`
+
+[`.github/workflows/release.yml`](.github/workflows/release.yml) runs on every
+push to `main`:
+
+1. **`changesets/action`** consumes any pending `.changeset/*.md` files. If
+   there are any, it opens (or updates) a **"chore: release"** PR that bumps
+   `version` in the three package.jsons and rewrites `CHANGELOG.md`. Nothing
+   is published yet.
+2. **Merging that release PR** triggers the workflow again. This time
+   `changesets/action` sees no pending changesets but a fresh version, so it
+   tags the commit (`v1.2.3`), creates a GitHub Release with the changelog,
+   and sets `published=true`.
+3. **`deploy-registry`** then runs `pnpm build:registry` and publishes the
+   `registry-dist/` JSON files to GitHub Pages. The URLs in [README.md](README.md)
+   are now serving the new version.
+
+CI on PRs ([`ci.yml`](.github/workflows/ci.yml)) lints, builds the packages,
+and builds the registry — so a broken `registry.json` blocks the PR before it
+can reach `main`.
+
+### One-time GitHub setup
+
+For the workflows to work, the repo needs (in **Settings → Actions → General**):
+
+- "Workflow permissions" set to **Read and write**
+- "Allow GitHub Actions to create and approve pull requests" **enabled**
+
+And in **Settings → Pages**, set the source to **GitHub Actions** (not a branch).
+
+No npm token is needed — we don't publish to npm.
+
+### Touching the registry manifest
+
+If you add or rename a file inside `packages/*/src/components/ui/filter-builder/`,
+update [`registry.json`](registry.json) at the repo root in the same PR. CI
+runs `pnpm build:registry`, which will fail if a referenced path no longer
+exists — so you'll catch this before merge regardless.

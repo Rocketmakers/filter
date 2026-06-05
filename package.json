@@ -9,13 +9,20 @@
     "dev:mantine": "pnpm -C packages/mantine dev",
     "dev:stylex": "pnpm -C packages/stylex dev",
     "build": "pnpm -r build",
+    "build:registry": "shadcn build registry.json --output ./registry-dist/r",
     "lint": "pnpm -r lint",
     "codemod": "node .robo-codemod/cli.cjs",
+    "changeset": "changeset",
+    "changeset:version": "changeset version && pnpm install --lockfile-only",
+    "changeset:tag": "changeset tag",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.0",
     "commitizen": "^4.3.1",
     "husky": "^9.1.7",
+    "shadcn": "^2.6.0",
     "typescript": "~6.0.2"
   },
   "packageManager": "pnpm@9.15.0",

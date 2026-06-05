@@ -1,0 +1,53 @@
+name: Auto changeset
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+concurrency:
+  group: auto-changeset-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  generate:
+    # Skip on PRs from forks — the default GITHUB_TOKEN can't push to forks
+    # without a PAT, and a fork contributor can add a changeset manually.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need write access back to the PR branch.
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate changeset from commits
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node scripts/generate-changeset.mjs
+
+      - name: Commit and push if changeset changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet --exit-code -- .changeset; then
+            echo "No changeset diff — nothing to commit."
+            exit 0
+          fi
+
+          git add .changeset
+          # [skip ci] in the message stops this from re-triggering CI in a loop.
+          git commit -m "chore(changeset): auto-generate from commits [skip ci]"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
