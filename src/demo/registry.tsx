@@ -1,0 +1,180 @@
+import { format } from "date-fns";
+import {
+  AtSignIcon,
+  BadgeCheckIcon,
+  BuildingIcon,
+  CalendarDaysIcon,
+  ClockIcon,
+  DollarSignIcon,
+  SparklesIcon,
+  UserIcon,
+  WrenchIcon,
+} from "lucide-react";
+
+import type {
+  FilterBaseOption,
+  FilterOptionRegistry,
+} from "@/components/ui/filter-builder";
+
+import { DEPARTMENTS, SKILLS, type Department, type Skill } from "./employees";
+
+const matchesTerm = (haystack: string, term: string) =>
+  haystack.toLowerCase().includes(term.toLowerCase());
+
+const departmentToOption = (
+  dept: Department
+): FilterBaseOption<Department> => ({
+  id: dept.id,
+  label: dept.name,
+  value: dept,
+});
+
+const skillToOption = (skill: Skill): FilterBaseOption<Skill> => ({
+  id: skill.id,
+  label: skill.name,
+  value: skill,
+});
+
+const Badge = ({ children }: { children: React.ReactNode }) => (
+  <span className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-foreground">
+    {children}
+  </span>
+);
+
+const dateShortcuts = (): FilterBaseOption<Date>[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const ago = (days: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - days);
+    return d;
+  };
+  const ahead = (days: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + days);
+    return d;
+  };
+  return [
+    { id: "today", label: "Today", value: today },
+    { id: "yesterday", label: "Yesterday", value: ago(1) },
+    { id: "last-week", label: "1 week ago", value: ago(7) },
+    { id: "last-month", label: "1 month ago", value: ago(30) },
+    { id: "last-year", label: "1 year ago", value: ago(365) },
+    { id: "next-week", label: "In 1 week", value: ahead(7) },
+  ];
+};
+
+const dateTimeShortcuts = (): FilterBaseOption<Date>[] => {
+  const now = new Date();
+  const ago = (mins: number) => new Date(now.getTime() - mins * 60_000);
+  return [
+    { id: "now", label: "Right now", value: now },
+    { id: "5m", label: "5 minutes ago", value: ago(5) },
+    { id: "1h", label: "1 hour ago", value: ago(60) },
+    { id: "today-9am", label: "Today 9am", value: (() => {
+      const d = new Date(now);
+      d.setHours(9, 0, 0, 0);
+      return d;
+    })() },
+    { id: "24h", label: "24 hours ago", value: ago(60 * 24) },
+  ];
+};
+
+// Generics flow through naturally — the registry is typed by the union of
+// all filter option value types in the registry. We keep it broad here
+// (`Department | Skill`) since the select filters use different option types.
+export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    icon: <UserIcon />,
+  },
+  {
+    name: "email",
+    label: "Email",
+    type: "text",
+    icon: <AtSignIcon />,
+  },
+  {
+    name: "department",
+    label: "Department",
+    type: "select",
+    icon: <BuildingIcon />,
+    multiple: true,
+    filterSearch: async (term: string) =>
+      DEPARTMENTS.filter((d) => matchesTerm(d.name, term)),
+    mapToFilterOption: departmentToOption,
+    filterOptionRenderer: (opt) => <span>{opt.label}</span>,
+    filterSingleOptionRenderer: (vals) => <Badge>{vals[0]?.label}</Badge>,
+    filterMultipleOptionRenderer: (vals) => (
+      <div className="flex gap-1 flex-wrap">
+        {vals.slice(0, 2).map((v) => (
+          <Badge key={v.id}>{v.label}</Badge>
+        ))}
+        {vals.length > 2 && <Badge>+{vals.length - 2}</Badge>}
+      </div>
+    ),
+  } satisfies FilterOptionRegistry<Department>[number],
+  {
+    name: "skills",
+    label: "Skills",
+    type: "select",
+    icon: <SparklesIcon />,
+    multiple: true,
+    // skills is itself an array on the row, so we ask for CONTAINS semantics
+    multipleValues: true,
+    filterSearch: async (term: string) =>
+      SKILLS.filter((s) => matchesTerm(s.name, term)),
+    mapToFilterOption: skillToOption,
+    filterOptionRenderer: (opt) => <span>{opt.label}</span>,
+    filterSingleOptionRenderer: (vals) => <Badge>{vals[0]?.label}</Badge>,
+    filterMultipleOptionRenderer: (vals) => (
+      <div className="flex gap-1 flex-wrap">
+        {vals.slice(0, 2).map((v) => (
+          <Badge key={v.id}>{v.label}</Badge>
+        ))}
+        {vals.length > 2 && <Badge>+{vals.length - 2}</Badge>}
+      </div>
+    ),
+  } satisfies FilterOptionRegistry<Skill>[number],
+  {
+    name: "role",
+    label: "Role",
+    type: "text",
+    icon: <WrenchIcon />,
+  },
+  {
+    name: "salary",
+    label: "Salary",
+    type: "number",
+    icon: <DollarSignIcon />,
+    minNumber: 0,
+  },
+  {
+    name: "hireDate",
+    label: "Hire date",
+    type: "date",
+    icon: <CalendarDaysIcon />,
+    formatDate: (date) => format(date, "PP"),
+    customOptions: dateShortcuts(),
+  },
+  {
+    name: "lastLogin",
+    label: "Last login",
+    type: "dateTime",
+    icon: <ClockIcon />,
+    formatDate: (date) => format(date, "PP p"),
+    customOptions: dateTimeShortcuts(),
+  },
+  {
+    name: "isActive",
+    label: "Active",
+    type: "boolean",
+    icon: <BadgeCheckIcon />,
+    context: {
+      trueValueLabel: "Active",
+      falseValueLabel: "Inactive",
+    },
+  },
+];
