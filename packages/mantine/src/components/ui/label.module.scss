@@ -1,0 +1,10 @@
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fb-spacing-sm);
+  font-size: var(--fb-text-sm);
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+  color: var(--fb-fg);
+}

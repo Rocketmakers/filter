@@ -1,0 +1,66 @@
+/* Base resets only. Each rule is wrapped in `:where()` so its specificity is 0
+ * — UA defaults still lose (author CSS always beats UA regardless of layer)
+ * but ANY StyleX-generated class (specificity 0,1,0) wins, including ones in
+ * the `@layer priorityN` blocks the unplugin emits. Without `:where()`, an
+ * unlayered shorthand like `button { padding: 0 }` clobbers StyleX's longhand
+ * `padding-inline: 0.5rem` because unlayered > layered author CSS. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #0a0a0a;
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p) {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+}
+
+:where(button) {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+}
+
+:where(input, select, textarea) {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Global UA focus reset. Components express focus via background-color
+ * (matching the Tailwind variant's shadcn behaviour). */
+:focus,
+:focus-visible {
+  outline: none;
+}

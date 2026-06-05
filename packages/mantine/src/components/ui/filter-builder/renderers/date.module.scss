@@ -1,0 +1,16 @@
+.layout {
+  display: grid;
+  grid-template-columns: 13rem 20rem;
+  width: 100%;
+}
+
+.calendarPane {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  margin-left: 0.25rem;
+  padding: var(--fb-spacing-md);
+  border-left: 1px solid var(--fb-border);
+  box-sizing: border-box;
+}

@@ -1,0 +1,56 @@
+export type Department = { id: string; name: string };
+export type Skill = { id: string; name: string };
+
+export type Employee = {
+  id: string;
+  name: string;
+  email: string;
+  department: Department;
+  role: string;
+  skills: Skill[];
+  salary: number;
+  hireDate: Date;
+  lastLogin: Date;
+  isActive: boolean;
+};
+
+export const DEPARTMENTS: Department[] = [
+  { id: "eng", name: "Engineering" },
+  { id: "design", name: "Design" },
+  { id: "product", name: "Product" },
+  { id: "sales", name: "Sales" },
+  { id: "ops", name: "Operations" },
+];
+
+export const SKILLS: Skill[] = [
+  { id: "ts", name: "TypeScript" },
+  { id: "react", name: "React" },
+  { id: "node", name: "Node.js" },
+  { id: "rust", name: "Rust" },
+  { id: "go", name: "Go" },
+  { id: "figma", name: "Figma" },
+  { id: "sql", name: "SQL" },
+  { id: "k8s", name: "Kubernetes" },
+  { id: "research", name: "User Research" },
+  { id: "copy", name: "Copywriting" },
+];
+
+const d = (iso: string) => new Date(iso);
+
+export const EMPLOYEES: Employee[] = [
+  { id: "1", name: "Ada Lovelace", email: "ada@example.com", department: DEPARTMENTS[0], role: "Staff Engineer", skills: [SKILLS[0], SKILLS[1], SKILLS[3]], salary: 175000, hireDate: d("2019-04-12"), lastLogin: d("2026-06-04T09:14:00"), isActive: true },
+  { id: "2", name: "Grace Hopper", email: "grace@example.com", department: DEPARTMENTS[0], role: "Principal Engineer", skills: [SKILLS[0], SKILLS[2], SKILLS[6]], salary: 210000, hireDate: d("2016-08-01"), lastLogin: d("2026-06-05T07:43:00"), isActive: true },
+  { id: "3", name: "Alan Turing", email: "alan@example.com", department: DEPARTMENTS[0], role: "Engineer", skills: [SKILLS[3], SKILLS[4]], salary: 145000, hireDate: d("2021-11-22"), lastLogin: d("2026-05-30T18:02:00"), isActive: true },
+  { id: "4", name: "Margaret Hamilton", email: "margaret@example.com", department: DEPARTMENTS[2], role: "Product Lead", skills: [SKILLS[8]], salary: 165000, hireDate: d("2020-02-17"), lastLogin: d("2026-06-04T14:55:00"), isActive: true },
+  { id: "5", name: "Hedy Lamarr", email: "hedy@example.com", department: DEPARTMENTS[1], role: "Senior Designer", skills: [SKILLS[5], SKILLS[8]], salary: 130000, hireDate: d("2022-06-09"), lastLogin: d("2026-06-03T11:11:00"), isActive: true },
+  { id: "6", name: "Katherine Johnson", email: "katherine@example.com", department: DEPARTMENTS[4], role: "Operations Manager", skills: [SKILLS[6]], salary: 120000, hireDate: d("2018-09-03"), lastLogin: d("2026-04-18T09:00:00"), isActive: false },
+  { id: "7", name: "Linus Torvalds", email: "linus@example.com", department: DEPARTMENTS[0], role: "Engineer", skills: [SKILLS[2], SKILLS[7]], salary: 155000, hireDate: d("2017-01-15"), lastLogin: d("2026-06-05T08:30:00"), isActive: true },
+  { id: "8", name: "Tim Berners-Lee", email: "tim@example.com", department: DEPARTMENTS[0], role: "Engineer", skills: [SKILLS[0], SKILLS[1]], salary: 140000, hireDate: d("2023-03-01"), lastLogin: d("2026-06-02T16:22:00"), isActive: true },
+  { id: "9", name: "Brendan Eich", email: "brendan@example.com", department: DEPARTMENTS[3], role: "Account Executive", skills: [SKILLS[9]], salary: 110000, hireDate: d("2024-05-20"), lastLogin: d("2026-05-29T13:14:00"), isActive: true },
+  { id: "10", name: "Anita Borg", email: "anita@example.com", department: DEPARTMENTS[2], role: "Product Manager", skills: [SKILLS[8], SKILLS[9]], salary: 150000, hireDate: d("2021-07-04"), lastLogin: d("2026-06-04T19:01:00"), isActive: true },
+  { id: "11", name: "Donald Knuth", email: "don@example.com", department: DEPARTMENTS[0], role: "Distinguished Engineer", skills: [SKILLS[0], SKILLS[3], SKILLS[4], SKILLS[6]], salary: 250000, hireDate: d("2014-10-10"), lastLogin: d("2026-06-01T07:00:00"), isActive: true },
+  { id: "12", name: "Susan Kare", email: "susan@example.com", department: DEPARTMENTS[1], role: "Designer", skills: [SKILLS[5]], salary: 105000, hireDate: d("2023-11-13"), lastLogin: d("2026-05-28T10:45:00"), isActive: true },
+  { id: "13", name: "John Carmack", email: "john@example.com", department: DEPARTMENTS[0], role: "Engineer", skills: [SKILLS[2], SKILLS[3], SKILLS[4]], salary: 180000, hireDate: d("2020-12-01"), lastLogin: d("2026-06-05T01:18:00"), isActive: false },
+  { id: "14", name: "Mary Allen Wilkes", email: "mary@example.com", department: DEPARTMENTS[4], role: "Operations", skills: [SKILLS[6], SKILLS[8]], salary: 95000, hireDate: d("2025-01-19"), lastLogin: d("2026-06-05T08:15:00"), isActive: true },
+  { id: "15", name: "Bjarne Stroustrup", email: "bjarne@example.com", department: DEPARTMENTS[0], role: "Engineer", skills: [SKILLS[2], SKILLS[3]], salary: 160000, hireDate: d("2015-05-05"), lastLogin: d("2025-12-20T10:00:00"), isActive: false },
+];

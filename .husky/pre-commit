@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+
+# Skip cases:
+#   CODEMOD_SKIP=1  — explicit per-command escape hatch
+#   HUSKY=0         — husky globally disabled
+if [ "${CODEMOD_SKIP}" = "1" ] || [ "${HUSKY}" = "0" ]; then
+  exit 0
+fi
+
+# Auto mode: run without prompting. Matches the codemod's own --auto semantics
+# and is the right default for CI or when the developer explicitly opts in.
+if [ "${CODEMOD_AUTO}" = "1" ]; then
+  exec node .robo-codemod/cli.cjs --staged
+fi
+
+# No TTY (CI, some git GUIs that pipe stdin): skip silently — we can't prompt,
+# and blocking the commit on a missing answer is worse than just letting it
+# through. Set CODEMOD_AUTO=1 in those environments to opt in.
+if [ ! -t 0 ] && [ ! -e /dev/tty ]; then
+  exit 0
+fi
+
+# Ask. Husky redirects stdin from the hook so read from /dev/tty directly.
+# Default is No — press y to run the codemod, anything else (incl. plain Enter)
+# skips it.
+printf "Run cross-package codemod against staged diff? [y/N] "
+read -r answer </dev/tty || answer=""
+case "$answer" in
+  [yY]|[yY][eE][sS])
+    exec node .robo-codemod/cli.cjs --staged
+    ;;
+  *)
+    echo "Skipping codemod. (CODEMOD_AUTO=1 to always run, CODEMOD_SKIP=1 to silence the prompt.)"
+    exit 0
+    ;;
+esac

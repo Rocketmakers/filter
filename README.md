@@ -1,246 +1,111 @@
 # filter-builder
 
-Filter builder for React + Tailwind + Radix.
+Three flavours of the same compound `FilterBuilder` component, each in its own
+package. All shadcn-style: copy the source into your app, no library dep.
 
-Generic over the row type, supports six data types (`text`, `number`, `boolean`,
-`select`, `date`, `dateTime`), natural-language date parsing via `chrono-node`,
-async option search, multi-select with auto-condition switching, lockable pills,
-and a client-side `useFilteredRows` helper.
+| Package | Styling stack | Port | Dir |
+| --- | --- | --- | --- |
+| `@filter-builder/tailwind` | Tailwind v4 + Radix + cmdk | 5173 | [`packages/tailwind`](packages/tailwind) |
+| `@filter-builder/mantine` | Mantine v8 + SCSS modules | 5174 | [`packages/mantine`](packages/mantine) |
+| `@filter-builder/stylex` | StyleX + Radix + cmdk | 5175 | [`packages/stylex`](packages/stylex) |
 
-This repo is both the **dev playground** for the component and the **source you
-copy** into a consuming app — there's no published package. Drop the
-`src/components/ui/filter-builder/` folder (plus a few shadcn primitives) into
-your project and you're done.
+Each variant supports six filter types (`text`, `number`, `boolean`, `select`,
+`date`, `dateTime`), natural-language date parsing, async option search,
+multi-select with auto-condition switching, lockable pills, and a client-side
+`useFilteredRows` helper.
 
-## Running the playground
-
-```sh
-npm install
-npm run dev
-```
-
-Open <http://localhost:5173>. The demo filters 15 mock employees across all
-six filter types.
-
-## What's in the box
-
-```
-src/components/ui/filter-builder/
-├── filter-builder.tsx     # main controlled component
-├── add-button.tsx         # "+ Filter" trigger
-├── command.tsx            # filter-picker popover (cmdk)
-├── box.tsx                # one pill: property · condition · value · x
-├── context.ts             # internal Radix-style context
-├── types.ts               # all public types + condition registries
-├── utils.tsx              # renderer dispatch + condition-validity logic
-├── apply-filter.ts        # client-side filterRows / useFilteredRows
-├── index.ts               # public exports
-└── renderers/
-    ├── text.tsx
-    ├── number.tsx
-    ├── boolean.tsx
-    ├── select.tsx
-    ├── date.tsx           # calendar + chrono-node natural language
-    └── date-time.tsx      # calendar + time input + chrono-node
-```
-
-## Installing into a consuming app
-
-### 1. Required shadcn primitives
-
-The filter-builder consumes these shadcn-style primitives from
-`@/components/ui/`. Install them via the shadcn CLI **or** copy from this
-repo's `src/components/ui/`:
-
-- `button.tsx`
-- `command.tsx`
-- `popover.tsx`
-- `dropdown-menu.tsx`
-- `checkbox.tsx`
-- `label.tsx`
-- `calendar.tsx` (a thin wrapper over `react-day-picker`)
-- `tooltip.tsx`
-- `filter.tsx` (the compound visual primitive — copy as-is from this repo)
-
-You also need `src/lib/utils.ts` exporting the standard `cn(...)` helper.
-
-### 2. Runtime dependencies
+## Run everything
 
 ```sh
-npm install @radix-ui/react-popover @radix-ui/react-dropdown-menu \
-            @radix-ui/react-tooltip @radix-ui/react-checkbox \
-            @radix-ui/react-label @radix-ui/react-slot \
-            @radix-ui/react-context @radix-ui/react-dialog \
-            cmdk chrono-node date-fns react-day-picker lucide-react \
-            clsx tailwind-merge class-variance-authority lodash sonner
+pnpm install
+pnpm dev
 ```
 
-`sonner` is only used by the number renderer to show a "please enter a valid
-number" toast. If you'd rather use your own toast, replace the one import in
-`renderers/number.tsx`.
+Opens all three demos in parallel on 5173 / 5174 / 5175.
 
-### 3. Tailwind
+## Run one
 
-Tailwind v4 is used here, but the filter-builder itself uses only standard
-utility classes (`bg-popover`, `text-foreground`, `border-input`, etc.). Any
-shadcn-themed app should drop in without changes.
-
-### 4. Mount a `TooltipProvider`
-
-The "remove filter" button uses a tooltip. Add a `TooltipProvider` somewhere
-above the `FilterBuilder` (typically at your app root).
-
-## Usage
-
-```tsx
-import { useState } from "react";
-import {
-  FilterBuilder,
-  useFilteredRows,
-  type FilterBuilderValue,
-  type FilterOptionRegistry,
-} from "@/components/ui/filter-builder";
-
-type Order = {
-  id: string;
-  customer: { id: string; name: string };
-  total: number;
-  placedAt: Date;
-  paid: boolean;
-};
-
-const orderFilters: FilterOptionRegistry = [
-  { name: "customer", label: "Customer", type: "select" /* ... */ },
-  { name: "total", label: "Total", type: "number" },
-  { name: "placedAt", label: "Placed", type: "date" },
-  { name: "paid", label: "Paid", type: "boolean" },
-];
-
-function OrdersPage({ orders }: { orders: Order[] }) {
-  const [filters, setFilters] = useState<FilterBuilderValue[]>([]);
-  const filtered = useFilteredRows(orders, filters);
-
-  return (
-    <>
-      <FilterBuilder
-        id="orders-filter"
-        filters={orderFilters}
-        value={filters}
-        onChange={setFilters}
-      />
-      <OrderTable orders={filtered} />
-    </>
-  );
-}
+```sh
+pnpm dev:tw       # tailwind on 5173
+pnpm dev:mantine  # mantine on 5174
+pnpm dev:stylex   # stylex on 5175
 ```
 
-See `src/demo/registry.tsx` for a full registry covering every filter type,
-including async select search, `multipleValues` for array-of-tag fields, date
-shortcuts, and inverse boolean labels.
+## Light / dark
 
-## Filter config — every type
+Every demo has a light/dark toggle in the header so you can verify the dark
+theme path. The Tailwind variant uses shadcn's CSS-variable approach, Mantine
+uses `MantineProvider colorScheme`, StyleX uses `stylex.createTheme`.
 
-### text
+## Distribution
 
-```ts
-{ name: "title", label: "Title", type: "text" }
+This repo is structured so each package can be served as a shadcn-style
+registry later (flat `src/components/ui/` + `components.json`), but no
+registry is published yet. For now, copy the folder you want into your app.
+
+## AI codemod (cross-package sync)
+
+The three packages drift apart easily because they share a public API but
+diverge in styling stack. To keep them in sync, an AI codemod lives in
+[`.robo-codemod/`](.robo-codemod). When you change one package, it proposes the
+equivalent updates to the other two.
+
+### How it triggers
+
+- **Manual**: `pnpm codemod` — looks at staged changes first, falls back to
+  unstaged.
+- **Pre-commit hook** ([.husky/pre-commit](.husky/pre-commit)) — **prompts you
+  on every commit** (`Run cross-package codemod against staged diff? [y/N]`).
+  Press `y` to run, anything else (including plain Enter) to skip. The codemod
+  itself still only triggers when **exactly one** of the three packages has
+  staged changes (to avoid re-syncing during a multi-package commit). Output
+  files are left **unstaged** for you to review with `git diff` and stage in a
+  follow-up commit. Set `CODEMOD_AUTO=1` to always run without prompting (e.g.
+  in CI), or `CODEMOD_SKIP=1` to silence the prompt entirely for one commit.
+
+### Picking an AI provider
+
+The codemod supports the same providers as
+[robo-commitizen](../robo-commitizen): Claude CLI, OpenAI, Gemini, OpenRouter.
+Set the provider once and skip the prompt:
+
+```bash
+export CODEMOD_PROVIDER=claude-cli    # no key needed; uses the local `claude` binary
+# or
+export CODEMOD_PROVIDER=openai && export OPENAI_API_KEY=sk-...
+export CODEMOD_PROVIDER=gemini && export GEMINI_API_KEY=...
+export CODEMOD_PROVIDER=openrouter && export OPENROUTER_API_KEY=...
 ```
 
-Conditions: `contains`, `does not contain`. The user can also supply
-`customOptions` for predefined string suggestions.
+Override the auto-selected models if you want:
 
-### number
-
-```ts
-{ name: "salary", label: "Salary", type: "number", minNumber: 0 }
+```bash
+export CODEMOD_SMALL_MODEL=sonnet
+export CODEMOD_BIG_MODEL=opus
 ```
 
-Conditions: `is`, `is greater than`, `is less than`.
+The codemod also honours the existing `CZ_AI_*` vars as a fallback, so a repo
+that already uses robo-commitizen for commits gets the codemod for free.
 
-### boolean
+### Other useful env vars
 
-```ts
-{
-  name: "deactivated",
-  label: "Status",
-  type: "boolean",
-  context: { isInverse: true, trueValueLabel: "Active", falseValueLabel: "Inactive" },
-}
-```
+- `CODEMOD_AUTO=1` — skip every prompt and apply the AI suggestion without
+  confirmation. Use in CI or when you really trust the model.
+- `CODEMOD_SKIP=1` — bail out immediately. Useful as a per-command escape
+  hatch: `CODEMOD_SKIP=1 git commit -m "..."`.
+- `CODEMOD_SOURCE=tailwind` — force a specific source package even if multiple
+  packages are staged.
 
-`isInverse: true` flips the semantics of true/false — handy for negative-sense
-properties like `deactivated`.
+You can also bypass the hook entirely with `git commit --no-verify`.
 
-### select
+### Customising the package map
 
-```ts
-{
-  name: "department",
-  label: "Department",
-  type: "select",
-  multiple: true,
-  filterSearch: async (term) => api.searchDepartments(term),
-  mapToFilterOption: (dept) => ({ id: dept.id, label: dept.name, value: dept }),
-  filterOptionRenderer: (opt) => <span>{opt.label}</span>,
-  filterSingleOptionRenderer: ([v]) => <Badge>{v.label}</Badge>,
-  filterMultipleOptionRenderer: (vs) => <Badge>+{vs.length}</Badge>,
-}
-```
+Edit [`.codemod-config.cjs`](.codemod-config.cjs) to change the package
+roster, styling-stack descriptions, or which subpaths inside each package the
+codemod watches.
 
-Set `multipleValues: true` when the row's property is itself an array
-(e.g. `tags: string[]`) — this changes the conditions from `is one of` to
-`has one of` / `has all`.
+### What it owns
 
-### date
-
-```ts
-{
-  name: "hireDate",
-  label: "Hire date",
-  type: "date",
-  formatDate: (d) => format(d, "PP"),
-  customOptions: [
-    { id: "today", label: "Today", value: new Date() },
-    /* ... */
-  ],
-}
-```
-
-Renderer shows a left panel (shortcuts + natural-language preview) and a right
-panel (calendar). The user can type `tomorrow`, `in three months`, `1/1/2025`,
-etc. Locale is detected via `navigator.language` (en-GB vs en-US).
-
-### dateTime
-
-Same as `date` but with a time input below the calendar. Conditions are
-distinct (`DateTimeFilterConditions`) so they can't be mixed up in the
-condition dropdown.
-
-## Customizing pills
-
-Per-pill flags in `FilterBuilderValue`:
-
-- `locked: true` — replaces the X with a lock icon; the user cannot remove it.
-- `lockedCondition: true` — disables the condition dropdown.
-
-Useful for system-set filters (e.g. a global search term that's not user-removable).
-
-## What was changed from the source
-
-This was extracted from two internal components and improved:
-
-- **Stronger types** — removed `any` from public surface; tightened generics
-  with `unknown` internally and `TOption` at the boundary.
-- **Proper `dateTime` renderer** — original implementations routed `dateTime`
-  through the date renderer with no time input. This repo adds a real
-  `date-time.tsx` with a `<input type="time">` below the calendar.
-- **Decoupled `Filter` visual primitive** — no longer reaches into the
-  filter-builder context; takes a `hasFilters` prop instead. Easier to test
-  and reuse.
-- **Stripped logging** — original had `console.log` calls in the hot path.
-- **Sonner instead of a bespoke toast** — one less dep to pull in.
-- **Fixed bug** — original imported `Label` from `recharts` in the box.
-
-## License
-
-MIT.
+The `.robo-codemod/` folder is **your code**, shadcn-style — modify it freely.
+It does not pull a runtime dependency, just calls the AI provider's HTTP API
+(or spawns `claude -p` for Claude CLI).

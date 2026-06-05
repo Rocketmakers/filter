@@ -1,0 +1,83 @@
+#!/bin/sh
+
+# Husky v8 compatibility: source shim when present.
+if [ -f "$(dirname "$0")/_/husky.sh" ]; then
+  . "$(dirname "$0")/_/husky.sh"
+fi
+
+run_cz() {
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm exec cz "$@"
+    return $?
+  fi
+
+  if command -v bunx >/dev/null 2>&1; then
+    bunx cz "$@"
+    return $?
+  fi
+
+  if command -v yarn >/dev/null 2>&1; then
+    yarn cz "$@"
+    return $?
+  fi
+
+  npx --no-install cz "$@"
+}
+
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="$2"
+
+# Skip for merge/squash/amend/message-provided commits
+case "$COMMIT_SOURCE" in
+  merge|squash|commit|message)
+    exit 0
+    ;;
+esac
+
+# Skip if this is our internal commit (avoids recursion)
+[ "$CZ_AI_SKIP" = "1" ] && exit 0
+
+# Detect TTY availability without corrupting stdin (subshell test)
+if sh -c ': < /dev/tty' 2>/dev/null; then
+  # Interactive — full cz-ai flow with prompts, inner commit handles it
+  exec < /dev/tty
+  run_cz --hook --commit-msg-file "$COMMIT_MSG_FILE"
+  CZ_EXIT=$?
+
+  if [ $CZ_EXIT -eq 0 ] && [ -s "$COMMIT_MSG_FILE" ]; then
+    CZ_AI_SKIP=1 HUSKY=0 git commit -F "$COMMIT_MSG_FILE"
+    INNER_EXIT=$?
+
+    if [ $INNER_EXIT -eq 0 ]; then
+      # Tell the Husky shim to abort the outer git commit without printing a
+      # scary failure line. The inner commit already succeeded.
+      exit 99
+    fi
+
+    exit $INNER_EXIT
+  fi
+
+  # Abort when commitizen failed or did not produce a message.
+  exit 1
+else
+  # Headless (no TTY, e.g. CI / IDE / Claude Code)
+
+  # Keep explicit messages untouched (IDE, GUI, or -m flag).
+  if [ -s "$COMMIT_MSG_FILE" ]; then
+    exit 0
+  fi
+
+  # If structured headless inputs are provided, generate the commit message.
+  if [ -n "${CZ_AI_TYPE}${CZ_AI_SCOPE}${CZ_AI_SUBJECT}${CZ_AI_BODY}${CZ_AI_BREAKING}" ]; then
+    CZ_AI_HEADLESS=1 run_cz --hook --commit-msg-file "$COMMIT_MSG_FILE"
+    CZ_EXIT=$?
+
+    if [ $CZ_EXIT -eq 0 ] && [ -s "$COMMIT_MSG_FILE" ]; then
+      exit 0
+    fi
+    exit 1
+  fi
+
+  # Otherwise, fall back to git's normal commit flow.
+  exit 0
+fi

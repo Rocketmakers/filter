@@ -1,0 +1,68 @@
+/**
+ * Semantic CSS custom properties mirroring the Tailwind variant's shadcn
+ * tokens. SCSS modules reference these (never raw colour values), so the dark
+ * overrides below give us a working dark theme on every component.
+ *
+ * Mantine sets `data-mantine-color-scheme="dark"` on :root when the user
+ * toggles dark mode, so the override block is keyed off that.
+ */
+:root {
+  /* surfaces */
+  --fb-bg: #ffffff;
+  --fb-fg: #0a0a0a;
+  --fb-card: #ffffff;
+  --fb-card-fg: #0a0a0a;
+  --fb-popover: #ffffff;
+  --fb-popover-fg: #0a0a0a;
+  --fb-muted: #f5f5f5;
+  --fb-muted-fg: #737373;
+  --fb-accent: #f5f5f5;
+  --fb-accent-fg: #0a0a0a;
+  --fb-border: #e5e5e5;
+  --fb-input: #e5e5e5;
+  --fb-ring: rgba(64, 64, 64, 0.5);
+  --fb-destructive: #ef4444;
+  --fb-destructive-fg: #ffffff;
+
+  /* spacing scale */
+  --fb-spacing-xs: 0.25rem;
+  --fb-spacing-sm: 0.5rem;
+  --fb-spacing-md: 0.75rem;
+  --fb-spacing-lg: 1rem;
+  --fb-spacing-xl: 1.5rem;
+
+  /* radii */
+  --fb-radius-sm: 0.125rem;
+  --fb-radius-md: 0.375rem;
+  --fb-radius-lg: 0.5rem;
+  --fb-radius-full: 9999px;
+
+  /* type */
+  --fb-text-xs: 0.75rem;
+  --fb-text-sm: 0.875rem;
+  --fb-text-md: 1rem;
+  --fb-text-lg: 1.125rem;
+
+  /* shadows */
+  --fb-shadow-md:
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-mantine-color-scheme="dark"] {
+  --fb-bg: #0a0a0a;
+  --fb-fg: #fafafa;
+  --fb-card: #171717;
+  --fb-card-fg: #fafafa;
+  --fb-popover: #171717;
+  --fb-popover-fg: #fafafa;
+  --fb-muted: #262626;
+  --fb-muted-fg: #a3a3a3;
+  --fb-accent: #262626;
+  --fb-accent-fg: #fafafa;
+  --fb-border: rgba(255, 255, 255, 0.1);
+  --fb-input: rgba(255, 255, 255, 0.15);
+  --fb-ring: rgba(229, 229, 229, 0.5);
+  --fb-destructive: #ef4444;
+  --fb-destructive-fg: #ffffff;
+}

@@ -1,0 +1,41 @@
+.layout {
+  display: grid;
+  grid-template-columns: 13rem 20rem;
+  width: 100%;
+}
+
+.calendarPane {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  margin-left: 0.25rem;
+  padding: var(--fb-spacing-md);
+  border-left: 1px solid var(--fb-border);
+  box-sizing: border-box;
+  gap: var(--fb-spacing-md);
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--fb-spacing-sm);
+  padding-left: 0.25rem;
+}
+
+.timeInput {
+  height: 2rem;
+  padding: 0 var(--fb-spacing-sm);
+  border: 1px solid var(--fb-input);
+  border-radius: var(--fb-radius-md);
+  background: var(--fb-bg);
+  color: var(--fb-fg);
+  font-size: var(--fb-text-xs);
+  font-family: inherit;
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--fb-ring);
+    box-shadow: 0 0 0 3px var(--fb-ring);
+  }
+}
