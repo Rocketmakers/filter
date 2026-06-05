@@ -13,6 +13,7 @@ import {
 
 import type {
   FilterBaseOption,
+  FilterObjectConfig,
   FilterOptionRegistry,
 } from "@/components/ui/filter-builder";
 
@@ -82,10 +83,10 @@ const dateTimeShortcuts = (): FilterBaseOption<Date>[] => {
   ];
 };
 
-// Generics flow through naturally — the registry is typed by the union of
-// all filter option value types in the registry. We keep it broad here
-// (`Department | Skill`) since the select filters use different option types.
-export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
+// Each entry's shape is inferred from `type:`. Select filters pin their own
+// `TOption` via `satisfies FilterObjectConfig<…>` because `FilterObjectConfig`
+// is invariant in `TOption` and the registry holds heterogeneous selects.
+export const employeeFilters: FilterOptionRegistry = [
   {
     name: "name",
     label: "Name",
@@ -118,7 +119,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
         {vals.length > 2 && <Badge>+{vals.length - 2}</Badge>}
       </div>
     ),
-  } satisfies FilterOptionRegistry<Department>[number],
+  } satisfies FilterObjectConfig<Department>,
   {
     name: "skills",
     label: "Skills",
@@ -139,7 +140,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
         {vals.length > 2 && <Badge>+{vals.length - 2}</Badge>}
       </div>
     ),
-  } satisfies FilterOptionRegistry<Skill>[number],
+  } satisfies FilterObjectConfig<Skill>,
   {
     name: "role",
     label: "Role",

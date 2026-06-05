@@ -19,9 +19,7 @@ export function CalendarPicker({
       value={selectedDate ?? null}
       onChange={(next) => {
         if (!next) return;
-        // @mantine/dates v8 typing: `DateValue = string | Date | null`. The
-        // string form is the default; the Date form appears with custom config.
-        const date = next instanceof Date ? next : new Date(next);
+        const date = typeof next === "string" ? new Date(next) : next;
         if (!Number.isNaN(date.getTime())) onDateChange?.(date);
       }}
       firstDayOfWeek={1}

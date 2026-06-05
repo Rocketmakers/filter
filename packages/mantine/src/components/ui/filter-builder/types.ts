@@ -277,13 +277,28 @@ export type FilterConfig<TOption = unknown> =
   | FilterBooleanConfig
   | FilterObjectConfig<TOption>;
 
-export type FilterOptionRegistry<TOption = unknown> = FilterConfig<TOption>[];
+/**
+ * A registry of filter configs. Select entries should pin their `TOption`
+ * with `satisfies FilterObjectConfig<MyEntity>` per item, since
+ * `FilterObjectConfig` is invariant in `TOption` (it appears in input
+ * positions like `mapToFilterOption`). The registry uses
+ * `FilterObjectConfig<any>` as the "existential" container.
+ */
+export type FilterOptionRegistry = Array<
+  | FilterTextConfig
+  | FilterNumberConfig
+  | FilterDateConfig
+  | FilterDateTimeConfig
+  | FilterBooleanConfig
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | FilterObjectConfig<any>
+>;
 
-export type FilterBuilderValue<TOption = unknown> = {
+export type FilterBuilderValue = {
   id: string;
   property: string;
   condition: FilterCondition;
-  value: FilterBaseOption<TOption>[];
+  value: FilterBaseOption[];
   locked?: boolean;
   lockedCondition?: boolean;
 };

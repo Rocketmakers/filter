@@ -19,15 +19,13 @@ import {
   type FilterBuilderValue,
 } from "@/components/ui/filter-builder";
 
-import { EMPLOYEES, type Department, type Skill } from "./demo/employees";
+import { EMPLOYEES } from "./demo/employees";
 import { employeeFilters } from "./demo/registry";
 
 import styles from "./App.module.scss";
 
 export default function App() {
-  const [filters, setFilters] = useState<
-    FilterBuilderValue<Department | Skill>[]
-  >([]);
+  const [filters, setFilters] = useState<FilterBuilderValue[]>([]);
   const filteredEmployees = useFilteredRows(EMPLOYEES, filters);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const isDark = colorScheme === "dark";

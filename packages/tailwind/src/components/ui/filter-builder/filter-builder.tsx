@@ -21,15 +21,15 @@ import {
   updateFilterValue,
 } from "./utils";
 
-export type FilterBuilderProps<TOption = unknown> = {
+export type FilterBuilderProps = {
   /** DOM id propagated to the filter container — useful for testing hooks. */
   id?: string;
   /** Registry of filter configs the user can add. */
-  filters: FilterOptionRegistry<TOption>;
+  filters: FilterOptionRegistry;
   /** Controlled value — one entry per active filter pill. */
-  value: FilterBuilderValue<TOption>[];
+  value: FilterBuilderValue[];
   /** Called with the next value whenever the user adds/edits/removes a filter. */
-  onChange: (value: FilterBuilderValue<TOption>[]) => void;
+  onChange: (value: FilterBuilderValue[]) => void;
   /**
    * When false, a filter that's already active is hidden from the add-button
    * menu (except date/dateTime, which can be added multiple times for range-like
@@ -38,17 +38,17 @@ export type FilterBuilderProps<TOption = unknown> = {
   allowDuplicateFilters?: boolean;
 };
 
-export function FilterBuilder<TOption = unknown>({
+export function FilterBuilder({
   id,
   filters,
   value,
   onChange,
   allowDuplicateFilters = true,
-}: FilterBuilderProps<TOption>) {
+}: FilterBuilderProps) {
   const addFilter = useCallback(
     (
       newId: string,
-      filter: FilterConfig<TOption>,
+      filter: FilterConfig,
       newValue: FilterBaseOption[]
     ) => {
       const multipleValues =
@@ -121,9 +121,6 @@ export function FilterBuilder<TOption = unknown>({
     [selectableFilters]
   );
 
-  // The context is typed against `unknown` since pills are heterogeneous —
-  // text filters carry strings, dates carry Date, selects carry TOption etc.
-  // We narrow back to TOption at the public API boundary (onChange).
   const contextValue = useMemo<FilterBuilderContextValue>(
     () => ({
       value,

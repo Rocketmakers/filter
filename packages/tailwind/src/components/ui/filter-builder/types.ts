@@ -348,19 +348,37 @@ export type FilterConfig<TOption = unknown> =
   | FilterBooleanConfig
   | FilterObjectConfig<TOption>;
 
-export type FilterOptionRegistry<TOption = unknown> = FilterConfig<TOption>[];
+/**
+ * A registry of filter configs. The discriminated union narrows by `type` so
+ * non-select entries get full contextual typing; select entries should pin
+ * their `TOption` with a per-item `satisfies FilterObjectConfig<MyEntity>`
+ * since `FilterObjectConfig` is invariant in `TOption` (it appears in input
+ * positions like `mapToFilterOption`). The registry itself uses
+ * `FilterObjectConfig<any>` as the "existential" — each item carries its own
+ * `TOption`, recovered via the `satisfies` clause.
+ */
+export type FilterOptionRegistry = Array<
+  | FilterTextConfig
+  | FilterNumberConfig
+  | FilterDateConfig
+  | FilterDateTimeConfig
+  | FilterBooleanConfig
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | FilterObjectConfig<any>
+>;
 
 /**
  * The value-shape emitted by `FilterBuilder` via `onChange`. One entry per
  * active filter pill. `value` is intentionally heterogeneous — the underlying
  * shape depends on the filter's `dataType` (string for text/number, Date for
- * date/dateTime, boolean for boolean, TOption for select).
+ * date/dateTime, boolean for boolean, the select's `TOption` for select).
+ * Consumers discriminate via `condition.dataType` or `property` at runtime.
  */
-export type FilterBuilderValue<TOption = unknown> = {
+export type FilterBuilderValue = {
   id: string;
   property: string;
   condition: FilterCondition;
-  value: FilterBaseOption<TOption>[];
+  value: FilterBaseOption[];
   /** When true, the pill's X button is replaced with a lock icon. */
   locked?: boolean;
   /** When true, the condition dropdown is disabled. */

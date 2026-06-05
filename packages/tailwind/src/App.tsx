@@ -11,7 +11,7 @@ import {
   type FilterBuilderValue,
 } from "@/components/ui/filter-builder";
 
-import { EMPLOYEES, type Department, type Skill } from "./demo/employees";
+import { EMPLOYEES } from "./demo/employees";
 import { employeeFilters } from "./demo/registry";
 
 function useDarkMode() {
@@ -29,9 +29,7 @@ function useDarkMode() {
 }
 
 export default function App() {
-  const [filters, setFilters] = useState<
-    FilterBuilderValue<Department | Skill>[]
-  >([]);
+  const [filters, setFilters] = useState<FilterBuilderValue[]>([]);
   const filteredEmployees = useFilteredRows(EMPLOYEES, filters);
   const [dark, toggleDark] = useDarkMode();
 

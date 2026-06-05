@@ -21,25 +21,25 @@ import {
   updateFilterValue,
 } from "./utils";
 
-export type FilterBuilderProps<TOption = unknown> = {
+export type FilterBuilderProps = {
   id?: string;
-  filters: FilterOptionRegistry<TOption>;
-  value: FilterBuilderValue<TOption>[];
-  onChange: (value: FilterBuilderValue<TOption>[]) => void;
+  filters: FilterOptionRegistry;
+  value: FilterBuilderValue[];
+  onChange: (value: FilterBuilderValue[]) => void;
   allowDuplicateFilters?: boolean;
 };
 
-export function FilterBuilder<TOption = unknown>({
+export function FilterBuilder({
   id,
   filters,
   value,
   onChange,
   allowDuplicateFilters = true,
-}: FilterBuilderProps<TOption>) {
+}: FilterBuilderProps) {
   const addFilter = useCallback(
     (
       newId: string,
-      filter: FilterConfig<TOption>,
+      filter: FilterConfig,
       newValue: FilterBaseOption[],
     ) => {
       const multipleValues =

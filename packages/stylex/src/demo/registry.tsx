@@ -14,6 +14,7 @@ import * as stylex from "@stylexjs/stylex";
 
 import type {
   FilterBaseOption,
+  FilterObjectConfig,
   FilterOptionRegistry,
 } from "@/components/ui/filter-builder";
 import { radii, spacing, text } from "@/constants.stylex";
@@ -106,7 +107,7 @@ const dateTimeShortcuts = (): FilterBaseOption<Date>[] => {
   ];
 };
 
-export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
+export const employeeFilters: FilterOptionRegistry = [
   {
     name: "name",
     label: "Name",
@@ -139,7 +140,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
         {vals.length > 2 && <Badge>+{vals.length - 2}</Badge>}
       </div>
     ),
-  } satisfies FilterOptionRegistry<Department>[number],
+  } satisfies FilterObjectConfig<Department>,
   {
     name: "skills",
     label: "Skills",
@@ -159,7 +160,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
         {vals.length > 2 && <Badge>+{vals.length - 2}</Badge>}
       </div>
     ),
-  } satisfies FilterOptionRegistry<Skill>[number],
+  } satisfies FilterObjectConfig<Skill>,
   {
     name: "role",
     label: "Role",

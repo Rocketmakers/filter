@@ -14,6 +14,7 @@ import {
 
 import type {
   FilterBaseOption,
+  FilterObjectConfig,
   FilterOptionRegistry,
 } from "@/components/ui/filter-builder";
 
@@ -79,7 +80,7 @@ const dateTimeShortcuts = (): FilterBaseOption<Date>[] => {
   ];
 };
 
-export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
+export const employeeFilters: FilterOptionRegistry = [
   {
     name: "name",
     label: "Name",
@@ -122,7 +123,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
         )}
       </div>
     ),
-  } satisfies FilterOptionRegistry<Department>[number],
+  } satisfies FilterObjectConfig<Department>,
   {
     name: "skills",
     label: "Skills",
@@ -152,7 +153,7 @@ export const employeeFilters: FilterOptionRegistry<Department | Skill> = [
         )}
       </div>
     ),
-  } satisfies FilterOptionRegistry<Skill>[number],
+  } satisfies FilterObjectConfig<Skill>,
   {
     name: "role",
     label: "Role",

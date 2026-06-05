@@ -15,7 +15,7 @@ import { radii, spacing, text } from "@/constants.stylex";
 import { colors } from "@/tokens.stylex";
 import { useTheme } from "@/lib/theme";
 
-import { EMPLOYEES, type Department, type Skill } from "./demo/employees";
+import { EMPLOYEES } from "./demo/employees";
 import { employeeFilters } from "./demo/registry";
 
 const styles = stylex.create({
@@ -156,9 +156,7 @@ const styles = stylex.create({
 });
 
 export default function App() {
-  const [filters, setFilters] = useState<
-    FilterBuilderValue<Department | Skill>[]
-  >([]);
+  const [filters, setFilters] = useState<FilterBuilderValue[]>([]);
   const filteredEmployees = useFilteredRows(EMPLOYEES, filters);
   const { theme, toggle } = useTheme();
   const isDark = theme === "dark";

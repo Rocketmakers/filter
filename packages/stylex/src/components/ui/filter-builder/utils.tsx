@@ -64,20 +64,20 @@ export const getValidConditions = (
   });
 };
 
-export const updateFilterCondition = <T,>(
-  filters: FilterBuilderValue<T>[],
+export const updateFilterCondition = (
+  filters: FilterBuilderValue[],
   currentId: string,
   condition: FilterCondition,
-): FilterBuilderValue<T>[] =>
+): FilterBuilderValue[] =>
   filters.map((filter) =>
     filter.id === currentId ? { ...filter, condition } : filter,
   );
 
-export const updateFilterValue = <T,>(
-  filters: FilterBuilderValue<T>[],
+export const updateFilterValue = (
+  filters: FilterBuilderValue[],
   currentId: string,
-  value: FilterBaseOption<T>[],
-): FilterBuilderValue<T>[] => {
+  value: FilterBaseOption[],
+): FilterBuilderValue[] => {
   const prev = filters.find((f) => f.id === currentId);
   if (!prev) return filters;
 
