@@ -116,7 +116,11 @@ export const FilterBuilderBox = <T,>({
       </DropdownMenu>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal>
         <PopoverTrigger asChild>
-          <Filter.Predicate>{renderPredicate}</Filter.Predicate>
+          <Filter.Predicate
+            aria-label={`Edit ${filterConfig.label} value`}
+          >
+            {renderPredicate}
+          </Filter.Predicate>
         </PopoverTrigger>
         <PopoverContent ref={popoverRef} className="p-0">
           <Command>

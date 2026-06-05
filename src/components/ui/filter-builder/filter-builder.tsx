@@ -130,15 +130,26 @@ export function FilterBuilder<TOption = unknown>({
   // The context is typed against `unknown` since pills are heterogeneous —
   // text filters carry strings, dates carry Date, selects carry TOption etc.
   // We narrow back to TOption at the public API boundary (onChange).
-  const contextValue: FilterBuilderContextValue = {
-    value: value as FilterBuilderValue[],
-    filters: selectableFilters as FilterOptionRegistry,
-    addFilter: addFilter as FilterBuilderContextValue["addFilter"],
-    removeFilter,
-    updateFilter,
-    doesFilterExist,
-    updateFilterValueCondition,
-  };
+  const contextValue = useMemo<FilterBuilderContextValue>(
+    () => ({
+      value: value as FilterBuilderValue[],
+      filters: selectableFilters as FilterOptionRegistry,
+      addFilter: addFilter as FilterBuilderContextValue["addFilter"],
+      removeFilter,
+      updateFilter,
+      doesFilterExist,
+      updateFilterValueCondition,
+    }),
+    [
+      value,
+      selectableFilters,
+      addFilter,
+      removeFilter,
+      updateFilter,
+      doesFilterExist,
+      updateFilterValueCondition,
+    ]
+  );
 
   return (
     <FilterBuilderContextProvider {...contextValue}>

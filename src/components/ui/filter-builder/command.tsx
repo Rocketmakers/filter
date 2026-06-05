@@ -114,6 +114,7 @@ export const FilterCommand = ({ children }: { children: React.ReactNode }) => {
       if (!filter) return;
       setInputValue("");
       setSelectedFilter(filter);
+      comboInputRef.current?.focus();
     },
     [filters]
   );
