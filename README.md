@@ -9,21 +9,91 @@ package. All shadcn-style: copy the source into your app, no library dep.
 | `@filter-builder/mantine` | Mantine v8 + SCSS modules | 5174 | [`packages/mantine`](packages/mantine) |
 | `@filter-builder/stylex` | StyleX + Radix + cmdk | 5175 | [`packages/stylex`](packages/stylex) |
 
-Each variant supports six filter types (`text`, `number`, `boolean`, `select`,
+Every variant supports six filter types (`text`, `number`, `boolean`, `select`,
 `date`, `dateTime`), natural-language date parsing, async option search,
 multi-select with auto-condition switching, lockable pills, and a client-side
 `useFilteredRows` helper.
 
-## Run everything
+## Adding it to your app
+
+Pick the variant whose styling stack matches your app, then:
+
+1. Copy that package's `src/components/ui/filter-builder/` folder into your
+   project (preserve the folder; the imports inside it are relative).
+2. Copy the sibling primitives in `src/components/ui/` that the folder
+   imports from — `popover.tsx`, `dropdown-menu.tsx` / `menu.tsx`, `checkbox.tsx`,
+   `command.tsx`, `calendar.tsx`, `label.tsx`, `tooltip.tsx`, `button.tsx`, plus
+   the compound `filter.tsx`. The package's own README lists the exact set.
+3. Copy the `lib/` helper file(s) (`utils.ts` for Tailwind, `class-names.ts`
+   for Mantine, `sx.ts` for StyleX) and the theme/token files (`tokens.stylex.ts`
+   + `constants.stylex.ts` for StyleX; `theme/brand.scss` for Mantine).
+4. Install the npm dependencies the package's `package.json` lists under
+   `dependencies` (Radix, cmdk, chrono-node, date-fns, lucide-react, etc.).
+5. Wire any required providers at your app root (`TooltipProvider` for
+   Tailwind, `MantineProvider` + `DatesProvider` + `Notifications` for Mantine,
+   `ThemeProvider` for StyleX dark mode). Each package's `src/main.tsx` shows
+   the exact setup.
+
+If a primitive your copy depends on isn't already in your repo, you'll get a
+loud "module not found" error rather than mystery files appearing — that's
+intentional, and matches shadcn's "you own your components" philosophy. There's
+no `npx shadcn add` registry hooked up yet (that's planned), so for now this is
+a copy-paste flow.
+
+## Usage
+
+```tsx
+import { useState } from "react";
+import {
+  FilterBuilder,
+  useFilteredRows,
+  type FilterBuilderValue,
+} from "@/components/ui/filter-builder";
+
+type Order = {
+  id: string;
+  customer: { id: string; name: string };
+  total: number;
+  placedAt: Date;
+  paid: boolean;
+};
+
+const orderFilters = [
+  { name: "customer", label: "Customer", type: "select", /* ... */ },
+  { name: "total",    label: "Total",    type: "number" },
+  { name: "placedAt", label: "Placed",   type: "date" },
+  { name: "paid",     label: "Paid",     type: "boolean" },
+];
+
+function OrdersPage({ orders }: { orders: Order[] }) {
+  const [filters, setFilters] = useState<FilterBuilderValue[]>([]);
+  const filtered = useFilteredRows(orders, filters);
+
+  return (
+    <>
+      <FilterBuilder
+        filters={orderFilters}
+        value={filters}
+        onChange={setFilters}
+      />
+      <OrderTable orders={filtered} />
+    </>
+  );
+}
+```
+
+The full demo (`src/demo/registry.tsx` in any package) covers all six filter
+types, including async select search with custom option renderers, date
+shortcuts, and inverse-boolean labels.
+
+## Running the demos
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-Opens all three demos in parallel on 5173 / 5174 / 5175.
-
-## Run one
+Launches all three demos in parallel on 5173 / 5174 / 5175. To focus on one:
 
 ```sh
 pnpm dev:tw       # tailwind on 5173
@@ -31,81 +101,10 @@ pnpm dev:mantine  # mantine on 5174
 pnpm dev:stylex   # stylex on 5175
 ```
 
-## Light / dark
+Each demo's header has a light/dark toggle so you can verify both theme paths.
 
-Every demo has a light/dark toggle in the header so you can verify the dark
-theme path. The Tailwind variant uses shadcn's CSS-variable approach, Mantine
-uses `MantineProvider colorScheme`, StyleX uses `stylex.createTheme`.
+## Repository conventions
 
-## Distribution
-
-This repo is structured so each package can be served as a shadcn-style
-registry later (flat `src/components/ui/` + `components.json`), but no
-registry is published yet. For now, copy the folder you want into your app.
-
-## AI codemod (cross-package sync)
-
-The three packages drift apart easily because they share a public API but
-diverge in styling stack. To keep them in sync, an AI codemod lives in
-[`.robo-codemod/`](.robo-codemod). When you change one package, it proposes the
-equivalent updates to the other two.
-
-### How it triggers
-
-- **Manual**: `pnpm codemod` — looks at staged changes first, falls back to
-  unstaged.
-- **Pre-commit hook** ([.husky/pre-commit](.husky/pre-commit)) — **prompts you
-  on every commit** (`Run cross-package codemod against staged diff? [y/N]`).
-  Press `y` to run, anything else (including plain Enter) to skip. The codemod
-  itself still only triggers when **exactly one** of the three packages has
-  staged changes (to avoid re-syncing during a multi-package commit). Output
-  files are left **unstaged** for you to review with `git diff` and stage in a
-  follow-up commit. Set `CODEMOD_AUTO=1` to always run without prompting (e.g.
-  in CI), or `CODEMOD_SKIP=1` to silence the prompt entirely for one commit.
-
-### Picking an AI provider
-
-The codemod supports the same providers as
-[robo-commitizen](../robo-commitizen): Claude CLI, OpenAI, Gemini, OpenRouter.
-Set the provider once and skip the prompt:
-
-```bash
-export CODEMOD_PROVIDER=claude-cli    # no key needed; uses the local `claude` binary
-# or
-export CODEMOD_PROVIDER=openai && export OPENAI_API_KEY=sk-...
-export CODEMOD_PROVIDER=gemini && export GEMINI_API_KEY=...
-export CODEMOD_PROVIDER=openrouter && export OPENROUTER_API_KEY=...
-```
-
-Override the auto-selected models if you want:
-
-```bash
-export CODEMOD_SMALL_MODEL=sonnet
-export CODEMOD_BIG_MODEL=opus
-```
-
-The codemod also honours the existing `CZ_AI_*` vars as a fallback, so a repo
-that already uses robo-commitizen for commits gets the codemod for free.
-
-### Other useful env vars
-
-- `CODEMOD_AUTO=1` — skip every prompt and apply the AI suggestion without
-  confirmation. Use in CI or when you really trust the model.
-- `CODEMOD_SKIP=1` — bail out immediately. Useful as a per-command escape
-  hatch: `CODEMOD_SKIP=1 git commit -m "..."`.
-- `CODEMOD_SOURCE=tailwind` — force a specific source package even if multiple
-  packages are staged.
-
-You can also bypass the hook entirely with `git commit --no-verify`.
-
-### Customising the package map
-
-Edit [`.codemod-config.cjs`](.codemod-config.cjs) to change the package
-roster, styling-stack descriptions, or which subpaths inside each package the
-codemod watches.
-
-### What it owns
-
-The `.robo-codemod/` folder is **your code**, shadcn-style — modify it freely.
-It does not pull a runtime dependency, just calls the AI provider's HTTP API
-(or spawns `claude -p` for Claude CLI).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the commit flow (AI-assisted
+Conventional Commits via robo-commitizen) and the cross-package AI codemod
+that keeps the three variants in sync.
