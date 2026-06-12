@@ -7,3 +7,19 @@
 .header {
   border-bottom: 1px solid var(--fb-border);
 }
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 3rem;
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+.demoSection {
+  scroll-margin-top: 100px;
+}

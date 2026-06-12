@@ -52,6 +52,21 @@ const main = async () => {
     return;
   }
 
+  // Codemod is interactive (model picker, motivation prompt, confirm). If
+  // stdin isn't a TTY — e.g. someone accidentally piped into it
+  // (`foo | pnpm codemod`) or zsh's PS2 `pipe>` continuation ate the prompt —
+  // inquirer crashes inside its readline. Fail with a clear message instead.
+  // CODEMOD_AUTO=1 skips every prompt, so non-TTY is fine there.
+  if (!process.stdin.isTTY && process.env.CODEMOD_AUTO !== "1") {
+    console.error(
+      "\n  Codemod needs an interactive terminal (stdin is a pipe).\n" +
+        "  If you didn't mean to pipe into it, re-run `pnpm codemod` on its own.\n" +
+        "  For non-interactive use, set CODEMOD_AUTO=1 (and CODEMOD_PROVIDER).\n",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   try {
     const result = await runCodemod(opts);
     process.exitCode = result.status === "ai-error" ? 1 : 0;

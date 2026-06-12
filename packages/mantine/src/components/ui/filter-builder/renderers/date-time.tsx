@@ -20,11 +20,37 @@ import type {
 
 import styles from "./date-time.module.scss";
 
+const NUMBER_WORDS: Record<string, string> = {
+  one: "1", two: "2", three: "3", four: "4", five: "5",
+  six: "6", seven: "7", eight: "8", nine: "9", ten: "10",
+  eleven: "11", twelve: "12",
+};
+
+// chrono's casual parser handles word-form numbers ("three months") but is
+// flakier on digit-form phrases ("in 3 months time"). Generate both variants
+// so either phrasing resolves to a date.
+const variantsOf = (input: string): string[] => {
+  const trimmed = input.trim();
+  const variants = new Set<string>([trimmed]);
+  variants.add(
+    trimmed.replace(
+      /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/gi,
+      (m) => NUMBER_WORDS[m.toLowerCase()] ?? m,
+    ),
+  );
+  variants.add(trimmed.replace(/\s+time\b/i, ""));
+  return Array.from(variants);
+};
+
 const parseNaturalDateTime = (input: string): Date | null => {
   if (!input.trim()) return null;
   const locale = typeof navigator !== "undefined" ? navigator.language : "en";
-  if (locale === "en-GB") return chrono.en.GB.parseDate(input);
-  return chrono.en.parseDate(input);
+  const parser = locale === "en-GB" ? chrono.en.GB : chrono.en;
+  for (const variant of variantsOf(input)) {
+    const result = parser.parseDate(variant);
+    if (result) return result;
+  }
+  return null;
 };
 
 export const FilterDateTimeRenderer = ({
@@ -55,6 +81,8 @@ export const FilterDateTimeRenderer = ({
     () => parseNaturalDateTime(inputValue),
     [inputValue],
   );
+
+  const shortcuts = filter.shortcuts ?? [];
 
   const selectedDateTime = useMemo(() => {
     const raw = currentFilter?.value[0]?.value;
@@ -122,6 +150,41 @@ export const FilterDateTimeRenderer = ({
               onSelect={() => addOrUpdateFilter(filter, option)}
             >
               {option.label}
+            </CommandItem>
+          ))}
+          {shortcuts.map((shortcut) => (
+            <CommandItem
+              key={shortcut.id}
+              value={shortcut.label}
+              onSelect={() => {
+                const base = shortcut.build();
+                const next = new Date(base);
+                if (selectedDateTime) {
+                  next.setHours(
+                    selectedDateTime.getHours(),
+                    selectedDateTime.getMinutes(),
+                    0,
+                    0,
+                  );
+                  // Time was picked explicitly — show the full datetime so the
+                  // user sees what they chose.
+                  addOrUpdateFilter(filter, {
+                    id: shortcut.id,
+                    label: formatLabel(next),
+                    value: next,
+                  });
+                  return;
+                }
+                // No time set yet — keep the shortcut phrasing and suffix
+                // "'s date" so the box reads e.g. "has one on Today's date".
+                addOrUpdateFilter(filter, {
+                  id: shortcut.id,
+                  label: `${shortcut.label}'s date`,
+                  value: next,
+                });
+              }}
+            >
+              {shortcut.label}
             </CommandItem>
           ))}
         </CommandGroup>

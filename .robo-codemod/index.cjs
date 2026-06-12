@@ -2,10 +2,7 @@
 /* eslint-disable no-console */
 "use strict";
 
-const {
-  MANUAL_VALUE,
-  PACKAGE_NAMES,
-} = require("./shared.cjs");
+const { PACKAGE_NAMES } = require("./shared.cjs");
 const {
   detectSyncableChange,
   getStagedDiffForFiles,
@@ -20,6 +17,7 @@ const {
   getExecutionModelLabel,
   resolveExecutionModel,
 } = require("./ai.cjs");
+const { createProgressRenderer } = require("../.robo-shared/ai.cjs");
 const {
   ensureModelReady,
   previewAndConfirm,
@@ -111,13 +109,6 @@ const runCodemod = async (opts = {}) => {
   const { model: initialModel, modelChoices } = await selectModel(settings);
   const readyModel = await ensureModelReady(modelChoices, initialModel);
 
-  if (readyModel === MANUAL_VALUE) {
-    console.log(
-      "\n  Codemod skipped — no AI provider selected. Update the other packages by hand.\n",
-    );
-    return { status: "manual" };
-  }
-
   let motivation = "";
   if (!settings.auto) {
     motivation = await promptText(
@@ -137,9 +128,10 @@ const runCodemod = async (opts = {}) => {
   const largeDiff = sourceDiff.length > settings.largeDiffThreshold;
   const executionModel = resolveExecutionModel(readyModel, largeDiff, settings);
 
-  process.stdout.write(
-    `\n  Generating codemod (${getExecutionModelLabel(readyModel, executionModel)})...`,
-  );
+  console.log("");
+  const renderer = createProgressRenderer({
+    label: `codemod (${getExecutionModelLabel(readyModel, executionModel)})`,
+  });
 
   let suggestion;
   try {
@@ -148,11 +140,11 @@ const runCodemod = async (opts = {}) => {
       readyModel,
       settings,
       executionModel,
+      { onProgress: renderer.onProgress },
     );
-    console.log(" done!");
+    renderer.finish(true);
   } catch (error) {
-    console.log(" failed.");
-    printWarning(error.message);
+    renderer.finish(false, error.message);
     return { status: "ai-error", error: error.message };
   }
 

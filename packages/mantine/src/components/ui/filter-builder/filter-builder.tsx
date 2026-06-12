@@ -42,8 +42,13 @@ export function FilterBuilder({
       filter: FilterConfig,
       newValue: FilterBaseOption[],
     ) => {
+      // Every filter type carries an optional `multipleValues` flag now, so
+      // any field shape (text[], number[], boolean[], date[], etc.) can opt
+      // into plural-aware operators. Boolean is the only type where the
+      // property doesn't live on the config interface itself — it's read
+      // off the union via duck-type.
       const multipleValues =
-        filter.type === "select" ? filter.multipleValues : undefined;
+        "multipleValues" in filter ? filter.multipleValues : undefined;
       const hasMultipleValues = newValue.length > 1;
 
       const validConditions = getValidConditions(

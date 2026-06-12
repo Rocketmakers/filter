@@ -94,7 +94,9 @@ export const FilterBuilderBox = ({
       >
         <Menu.Target>
           <Filter.Condition disabled={conditionIsLocked}>
-            {value.condition.label}
+            {value.value.length === 1 && value.condition.singleLabel
+              ? value.condition.singleLabel
+              : value.condition.label}
           </Filter.Condition>
         </Menu.Target>
         {!conditionIsLocked && (

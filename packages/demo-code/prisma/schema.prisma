@@ -1,0 +1,50 @@
+// Prisma schema for the filter-builder demo's Employee model.
+//
+// The package never opens a DB connection — this file exists purely so
+// `prisma generate` produces typed client output (`Prisma.EmployeeWhereInput`
+// etc.) that the example file at src/integrations/examples/prisma.ts can
+// reference. Editing the schema requires re-running `pnpm install` (which
+// triggers the package's postinstall `prisma generate`).
+//
+// Postgres provider here so the example can demonstrate `mode: "insensitive"`
+// (which only the Postgres connector supports) and scalar arrays like
+// `String[]` (SQLite has no array column type).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://placeholder@localhost:5432/placeholder"
+}
+
+model Department {
+  id        String     @id
+  name      String
+  employees Employee[]
+}
+
+model Skill {
+  id        String     @id
+  name      String
+  employees Employee[] @relation("EmployeeSkills")
+}
+
+model Employee {
+  id           String     @id
+  name         String
+  email        String     @unique
+  role         String
+  salary       Int
+  hireDate     DateTime
+  lastLogin    DateTime
+  isActive     Boolean
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  skills       Skill[]    @relation("EmployeeSkills")
+  aliases                String[]
+  quarterlyScores        Int[]
+  performanceReviewDates DateTime[]
+  shiftStarts            DateTime[]
+}

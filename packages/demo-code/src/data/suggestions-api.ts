@@ -1,5 +1,3 @@
-import type { FilterBaseOption } from "@/components/ui/filter-builder";
-
 import {
   DEPARTMENTS,
   EMPLOYEES,
@@ -7,7 +5,21 @@ import {
   type Department,
   type Employee,
   type Skill,
-} from "./employees";
+} from "./employees.ts";
+
+/**
+ * Pretends to be a backend search endpoint:
+ *   GET /api/suggest?field=name&q=ada → 200 [{ id, label, value }]
+ *
+ * Returned by the per-package filter-builder via `filterSearch`. The shape
+ * matches every flavour's `FilterBaseOption<string>` — defined locally
+ * here so this package stays UI-independent.
+ */
+export type SuggestionOption = {
+  id: string;
+  label: string;
+  value: string;
+};
 
 const FIELDS = ["name", "email", "role"] as const;
 type Field = (typeof FIELDS)[number];
@@ -66,7 +78,7 @@ const POOLS: Record<Field, string[]> = {
 export async function searchSuggestions(
   field: Field,
   query: string,
-): Promise<FilterBaseOption<string>[]> {
+): Promise<SuggestionOption[]> {
   await sleep(randomLatency());
 
   const candidates = POOLS[field];
@@ -78,7 +90,7 @@ export async function searchSuggestions(
     .sort((a, b) => b.s - a.s)
     .slice(0, SERVER_RESULT_CAP)
     .map(
-      ({ label }): FilterBaseOption<string> => ({
+      ({ label }): SuggestionOption => ({
         id: `${field}:${label}`,
         label,
         value: label,

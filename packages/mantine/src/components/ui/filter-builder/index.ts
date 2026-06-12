@@ -20,6 +20,7 @@ export type {
   FilterConfigItemsRenderProps,
   FilterDataType,
   FilterDateConfig,
+  FilterDateShortcut,
   FilterDateTimeConfig,
   FilterNumberConfig,
   FilterObjectConfig,

@@ -1,0 +1,418 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 3rem;
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+// ─── TOC ──────────────────────────────────────────────────────────────────
+
+.tocCol {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  max-height: calc(100vh - 121px);
+
+  @media (max-width: 960px) {
+    display: none;
+  }
+}
+
+.tocLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  margin-top: 7px;
+}
+
+.tocWrapper {
+  position: relative;
+}
+
+.tocFadeTop,
+.tocFadeBottom {
+  position: absolute;
+  left: 0;
+  height: 0.75rem;
+  width: 100%;
+  pointer-events: none;
+}
+
+.tocFadeTop {
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    var(--mantine-color-body) 0%,
+    transparent 100%
+  );
+}
+
+.tocFadeBottom {
+  bottom: 0;
+  z-index: 10;
+  background: linear-gradient(
+    to top,
+    var(--mantine-color-body) 0%,
+    transparent 100%
+  );
+}
+
+.tocList {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+
+  > li + li {
+    margin-top: 0.625rem;
+  }
+}
+
+.tocLink {
+  display: block;
+  line-height: 1.6;
+  font-size: 0.875rem;
+  color: var(--mantine-color-dimmed);
+  text-decoration: none;
+  transition: color 120ms ease;
+
+  &:hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.tocLinkDepth2 {
+  padding-left: 0.75rem;
+}
+
+.tocLinkActive {
+  color: var(--mantine-primary-color-filled);
+  font-weight: 500;
+}
+
+.tocFooter {
+  margin-top: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--mantine-color-default-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.tocFooterLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--mantine-color-dimmed);
+  text-decoration: none;
+  transition: color 120ms ease;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+
+  &:hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+// ─── Copy-as-markdown-prompt: top-of-column item with separator ───────────
+//
+// Sits at the top of the TOC column, separated from "On this page" by a
+// thin divider. Flat — no card outline, no chip backgrounds. The whole
+// rectangle (label + icon strip beneath) is one clickable target with a
+// dim→text-colour hover transition matching the other TOC links.
+// Pointer-events stay on while disabled so the missing-picks tooltip can
+// still fire on hover.
+
+.copyPromptSection {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.copyPromptItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--mantine-color-dimmed);
+  text-align: left;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color 120ms ease;
+
+  &:hover {
+    color: var(--mantine-color-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-primary-color-filled);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+// When disabled: no colour shift, no anything on hover — the tooltip alone
+// surfaces the missing-picks message.
+.copyPromptItemDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+
+  &,
+  &:hover,
+  &:focus-visible {
+    color: var(--mantine-color-dimmed);
+    outline: none;
+  }
+
+  &:hover .copyPromptIcon {
+    color: var(--mantine-color-dimmed);
+  }
+}
+
+.copyPromptItemLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  line-height: 1.4;
+}
+
+// Icon strip sits flush-left above the label, sharing the column. Always
+// reserves vertical room (min-height) so the row doesn't grow taller the
+// moment the first pick lands.
+.copyPromptIconStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 14px;
+}
+
+.copyPromptIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: var(--mantine-color-dimmed);
+  // Override the 40x40 sizing from logos.tsx Wrap so logos render at the
+  // small inline-strip size. Both the wrapper span and the inner svg need it.
+  > span {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  > span > svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.copyPromptItem:hover .copyPromptIcon {
+  color: var(--mantine-color-text);
+}
+
+.copyPromptTooltipBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.copyPromptTooltipTitle {
+  font-weight: 400;
+}
+
+.copyPromptTooltipList {
+  margin: 0;
+  padding-left: 0.9rem;
+  font-weight: 400;
+
+  > li + li {
+    margin-top: 0.1rem;
+  }
+}
+
+// ─── Tile picker ──────────────────────────────────────────────────────────
+
+.section {
+  scroll-margin-top: 100px;
+}
+
+.groupHeader {
+  scroll-margin-top: 100px;
+}
+
+.tileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1.25rem;
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  color: var(--mantine-color-text);
+  cursor: pointer;
+  text-align: center;
+  transition: transform 120ms ease, border-color 120ms ease,
+    background 120ms ease, opacity 120ms ease;
+  font: inherit;
+
+  &:hover:not(:disabled) {
+    border-color: var(--mantine-primary-color-filled);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-primary-color-filled);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+
+.tileActive {
+  border-color: var(--mantine-primary-color-filled);
+  background: var(--mantine-color-default-hover);
+  box-shadow: 0 0 0 1px var(--mantine-primary-color-filled) inset;
+}
+
+.tileBlurb {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--mantine-color-dimmed);
+  line-height: 1.45;
+  max-width: 24ch;
+}
+
+.groupDisabled {
+  opacity: 0.45;
+  pointer-events: none;
+
+  // Keep the toggle visible-but-muted; pointer-events are already off
+  // from the parent so this is purely visual.
+  & .tile:hover {
+    transform: none;
+    border-color: var(--mantine-color-default-border);
+  }
+}
+
+.tileLogo {
+  color: var(--mantine-color-text);
+  opacity: 0.85;
+}
+
+.tileTitle {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.tileBadge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: var(--mantine-primary-color-filled);
+  color: var(--mantine-primary-color-contrast);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--mantine-radius-sm);
+  text-transform: uppercase;
+}
+
+.tileVariantTags {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.tileVariantTag {
+  background: var(--mantine-color-default-hover);
+  color: var(--mantine-color-dimmed);
+  border: 1px solid var(--mantine-color-default-border);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--mantine-radius-sm);
+  text-transform: uppercase;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: transparent;
+  border: 0;
+  padding: 0.25rem 0;
+  margin-bottom: 0.25rem;
+  color: var(--mantine-color-dimmed);
+  font: inherit;
+  cursor: pointer;
+  align-self: flex-start;
+
+  &:hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detailLogo {
+  color: var(--mantine-color-text);
+  opacity: 0.85;
+}
+
+.inlineCode {
+  font-family: var(--mantine-font-family-monospace, ui-monospace, SFMono-Regular,
+      Menlo, monospace);
+  font-size: 0.85em;
+  padding: 0.08em 0.35em;
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-default-hover);
+  border: 1px solid var(--mantine-color-default-border);
+  color: var(--mantine-color-text);
+  white-space: nowrap;
+}

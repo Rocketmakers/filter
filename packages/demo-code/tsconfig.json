@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    "paths": {
+      "@/components/ui/filter-builder": ["./src/integrations/shared.ts"]
+    }
+  },
+  "include": ["src"]
+}

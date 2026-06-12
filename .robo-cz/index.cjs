@@ -29,6 +29,7 @@ const {
 } = require("./ai.cjs");
 const { promptForCommit } = require("./prompt-flow.cjs");
 const { resolveSettings } = require("./settings.cjs");
+const { createProgressRenderer } = require("../.robo-shared/ai.cjs");
 
 const readHeadlessCommitParts = () =>
   normalizeCommitParts({
@@ -171,9 +172,9 @@ const generateAiSuggestion = async (
       largeDiff,
       settings,
     );
-    process.stdout.write(
-      `  Generating AI suggestion (${getExecutionModelLabel(selectedModel, executionModel)})...`,
-    );
+    const renderer = createProgressRenderer({
+      label: `AI suggestion (${getExecutionModelLabel(selectedModel, executionModel)})`,
+    });
 
     try {
       suggestion = await getAiSuggestion(
@@ -183,12 +184,14 @@ const generateAiSuggestion = async (
         selectedModel,
         settings,
         executionModel,
+        { onProgress: renderer.onProgress },
       );
+      renderer.finish(true);
       console.log(
-        ` done!\n\n  Suggestion: ${suggestion.type}${formatScope(suggestion.scope)}: ${suggestion.subject}\n`,
+        `\n  Suggestion: ${suggestion.type}${formatScope(suggestion.scope)}: ${suggestion.subject}\n`,
       );
     } catch (error) {
-      console.log(` failed.\n\n  Warning: ${error.message}\n`);
+      renderer.finish(false, error.message);
       selectedModel = await promptForModel(cz, modelChoices, selectedModel);
     }
   }
@@ -223,21 +226,28 @@ const generateLargeCommitSuggestion = async (
       settings.largeCommitChunkDiffChars,
     );
 
-    process.stdout.write(
-      `  Chunk ${chunkNumber}/${chunks.length}: summarizing ${chunkFilesList.length} files...`,
-    );
-    const summary = await getAiChunkSummary(
-      stat,
-      chunkStat,
-      chunkDiff,
-      chunkNumber,
-      chunks.length,
-      motivation,
-      model,
-      settings,
-      executionModel,
-    );
-    console.log(" done.");
+    const chunkRenderer = createProgressRenderer({
+      label: `chunk ${chunkNumber}/${chunks.length} — summarizing ${chunkFilesList.length} files`,
+    });
+    let summary;
+    try {
+      summary = await getAiChunkSummary(
+        stat,
+        chunkStat,
+        chunkDiff,
+        chunkNumber,
+        chunks.length,
+        motivation,
+        model,
+        settings,
+        executionModel,
+        { onProgress: chunkRenderer.onProgress },
+      );
+      chunkRenderer.finish(true);
+    } catch (error) {
+      chunkRenderer.finish(false, error.message);
+      throw error;
+    }
 
     chunkSummaries.push({
       index: chunkNumber,
@@ -248,19 +258,27 @@ const generateLargeCommitSuggestion = async (
     });
   }
 
-  process.stdout.write(
-    `  Synthesizing final suggestion (${getExecutionModelLabel(model, executionModel)})...`,
-  );
-  const suggestion = await getAiSuggestionFromChunkSummaries(
-    stat,
-    chunkSummaries,
-    motivation,
-    model,
-    settings,
-    executionModel,
-  );
+  const finalRenderer = createProgressRenderer({
+    label: `final suggestion (${getExecutionModelLabel(model, executionModel)})`,
+  });
+  let suggestion;
+  try {
+    suggestion = await getAiSuggestionFromChunkSummaries(
+      stat,
+      chunkSummaries,
+      motivation,
+      model,
+      settings,
+      executionModel,
+      { onProgress: finalRenderer.onProgress },
+    );
+    finalRenderer.finish(true);
+  } catch (error) {
+    finalRenderer.finish(false, error.message);
+    throw error;
+  }
   console.log(
-    ` done!\n\n  Suggestion: ${suggestion.type}${formatScope(suggestion.scope)}: ${suggestion.subject}\n`,
+    `\n  Suggestion: ${suggestion.type}${formatScope(suggestion.scope)}: ${suggestion.subject}\n`,
   );
 
   return suggestion;
