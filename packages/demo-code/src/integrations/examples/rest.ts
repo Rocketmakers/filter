@@ -1,5 +1,8 @@
 import type { FilterBuilderValue, FilterDataType } from "../shared.ts";
 
+const hasId = (v: unknown): v is { id: unknown } =>
+  typeof v === "object" && v !== null && "id" in v;
+
 export function toRestQueryString(filters: FilterBuilderValue[]): string {
   const params = new URLSearchParams();
 
@@ -29,9 +32,7 @@ function serializeValue(
     return new Date(String(raw)).toISOString();
   }
   if (dataType === "boolean") return raw ? "true" : "false";
-  if (raw && typeof raw === "object" && "id" in raw) {
-    return String((raw as { id: unknown }).id);
-  }
+  if (hasId(raw)) return String(raw.id);
   return String(raw ?? fallbackLabel ?? "");
 }
 

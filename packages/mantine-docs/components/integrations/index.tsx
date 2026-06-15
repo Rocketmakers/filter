@@ -189,6 +189,7 @@ export function BackendIntegrations() {
             key={group.id}
             group={group}
             enabled={enabled}
+            wizardState={wizardState}
             selectedExampleId={selectedExamples[group.id] ?? null}
             onSelect={(id) =>
               setSelectedExamples((prev) => ({ ...prev, [group.id]: id }))
@@ -299,6 +300,7 @@ function buildVariantKey(
 function TilesSectionUI({
   group,
   enabled,
+  wizardState,
   selectedExampleId,
   onSelect,
   toggleState,
@@ -307,6 +309,7 @@ function TilesSectionUI({
 }: {
   group: ResolvedTileGroup;
   enabled: boolean;
+  wizardState: WizardState;
   selectedExampleId: string | null;
   onSelect: (id: string | null) => void;
   toggleState: Record<string, string>;
@@ -317,12 +320,37 @@ function TilesSectionUI({
     ? (group.examples.find((e) => e.id === selectedExampleId) ?? null)
     : null;
 
+  /**
+   * A toggle that's "derived" (e.g. Filter source) is hidden whenever its
+   * value can be read straight off the wizard answer above (storage = "url"
+   * or "state") — only shown when the wizard answer is in `showToggleWhen`
+   * (storage = "both"), where the user genuinely needs to pick.
+   */
+  function isToggleHidden(
+    toggle: NonNullable<ResolvedTileGroup["toggles"]>[number],
+  ): boolean {
+    const derived = toggle.derivedFromState;
+    if (!derived) return false;
+    const wizardValue = wizardState[derived.stateKey];
+    if (!wizardValue) return false;
+    return !(derived.showToggleWhen ?? []).includes(wizardValue);
+  }
+
   const effectiveToggleState: Record<string, string> = {};
   for (const toggle of group.toggles ?? []) {
-    effectiveToggleState[toggle.id] =
-      toggleState[toggle.id] ?? toggle.defaultId;
+    const derived = toggle.derivedFromState;
+    const wizardValue = derived ? wizardState[derived.stateKey] : undefined;
+    if (derived && wizardValue && isToggleHidden(toggle)) {
+      effectiveToggleState[toggle.id] = wizardValue;
+    } else {
+      effectiveToggleState[toggle.id] =
+        toggleState[toggle.id] ?? toggle.defaultId;
+    }
   }
   const variantKey = buildVariantKey(group.toggles, effectiveToggleState);
+
+  const visibleToggles =
+    group.toggles?.filter((t) => !isToggleHidden(t)) ?? [];
 
   const variantTags: string[] =
     group.toggles?.map((t) => {
@@ -347,9 +375,9 @@ function TilesSectionUI({
           </Text>
         </div>
 
-        {group.toggles && group.toggles.length > 0 ? (
+        {visibleToggles.length > 0 ? (
           <Group gap="lg" wrap="wrap" align="flex-end">
-            {group.toggles.map((toggle) => (
+            {visibleToggles.map((toggle) => (
               <Stack key={toggle.id} gap={4}>
                 <Text size="xs" c="dimmed">
                   {toggle.label}

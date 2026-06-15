@@ -24,9 +24,6 @@ src/components/ui/
 │   └── renderers/         # text · number · boolean · select · date · dateTime
 ├── filter.tsx + .module.scss     # compound visual primitive
 ├── button.tsx                    # Mantine Button wrapper
-├── popover.tsx                   # re-exports Mantine Popover
-├── menu.tsx                      # re-exports Mantine Menu (was: dropdown-menu)
-├── tooltip.tsx                   # re-exports Mantine Tooltip
 ├── checkbox.tsx                  # re-exports Mantine Checkbox
 ├── calendar.tsx                  # @mantine/dates Calendar wrapper
 ├── label.tsx + .module.scss
@@ -35,7 +32,7 @@ src/components/ui/
 
 ## Visual stack
 
-- **Mantine v8** primitives for Popover, Menu, Tooltip, Checkbox, Button, Calendar
+- **Mantine v8** primitives for Checkbox, Button, Calendar
   (`@mantine/core` + `@mantine/dates`).
 - **@mantine/notifications** in place of `sonner`.
 - **.module.scss** files paired with each `.tsx`. Every colour and spacing reads

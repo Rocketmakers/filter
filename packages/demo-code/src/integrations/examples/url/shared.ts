@@ -11,6 +11,9 @@ const SEP = ".";
 const encodeSegment = (s: string): string =>
   encodeURIComponent(s).replace(/\./g, "%2E");
 
+const hasId = (v: unknown): v is { id: unknown } =>
+  typeof v === "object" && v !== null && "id" in v;
+
 function serializeValue(
   raw: unknown,
   fallbackLabel: string,
@@ -20,9 +23,7 @@ function serializeValue(
     return raw.toISOString();
   }
   if (dataType === "boolean") return raw ? "true" : "false";
-  if (raw && typeof raw === "object" && "id" in raw) {
-    return String((raw as { id: unknown }).id);
-  }
+  if (hasId(raw)) return String(raw.id);
   return String(raw ?? fallbackLabel ?? "");
 }
 

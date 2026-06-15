@@ -1,23 +1,20 @@
 {
-  "name": "@filter-builder/mantine",
+  "name": "@filter-builder/mantine-docs",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "exports": {
-    "./theme": "./src/theme/mantineTheme.ts",
-    "./theme/styles": "./src/theme/globals.scss",
-    "./theme/brand": "./src/theme/brand.scss",
-    "./demo/registry": "./src/demo/registry.tsx",
-    "./components/filter-builder": "./src/components/ui/filter-builder/index.ts"
-  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "generate:sources": "node scripts/generate-example-sources.mjs",
+    "predev": "node scripts/generate-example-sources.mjs",
+    "prebuild": "node scripts/generate-example-sources.mjs",
+    "dev": "next dev --port 5176",
+    "build": "next build",
+    "start": "next start --port 5176",
+    "lint": "next lint"
   },
   "dependencies": {
     "@filter-builder/demo-code": "workspace:^",
+    "@filter-builder/mantine": "workspace:^",
     "@mantine/code-highlight": "^8.3.0",
     "@mantine/core": "^8.3.0",
     "@mantine/dates": "^8.3.0",
@@ -30,26 +27,21 @@
     "highlight.js": "^11.11.1",
     "lodash": "^4.18.1",
     "lucide-react": "^1.17.0",
+    "next": "^15.5.0",
+    "nextra": "^4.6.1",
+    "nextra-theme-docs": "^4.6.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@types/lodash": "^4.17.24",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^10.3.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.6.0",
     "postcss": "^8.4.49",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
     "sass": "^1.94.1",
-    "typescript": "~6.0.2",
-    "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "typescript": "~6.0.2"
   }
 }

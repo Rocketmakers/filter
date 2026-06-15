@@ -1,10 +1,3 @@
-/**
- * UI-agnostic metadata for the integration examples shown on the demo
- * pages: titles, blurbs, groups, and TOC sections. The actual source
- * for each example lives in `./examples/*.ts` — UI packages load those
- * via Vite `?raw` imports to display them as code blocks.
- */
-
 export type ExampleLanguage = "ts" | "tsx" | "sql" | "graphql";
 
 export type ExampleVariant = {
@@ -43,6 +36,15 @@ export type GroupToggle = {
   options: { id: string; label: string }[];
   /** Which option is selected on first render. */
   defaultId: string;
+  /**
+   * When set, the toggle value is forced from `wizardState[stateKey]` and the
+   * control is hidden — unless the wizard value is one of `showToggleWhen`
+   * (e.g. storage "both"), in which case the user picks via the toggle.
+   */
+  derivedFromState?: {
+    stateKey: string;
+    showToggleWhen?: string[];
+  };
 };
 
 /** When the group is "enabled" — read against the wizard state. */
@@ -305,6 +307,10 @@ export const integrationGroups: IntegrationGroup[] = [
           { id: "state", label: "State" },
         ],
         defaultId: "url",
+        derivedFromState: {
+          stateKey: "storage",
+          showToggleWhen: ["both"],
+        },
       },
     ],
     examples: [

@@ -28,6 +28,11 @@
     "typescript": "~6.0.2"
   },
   "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "overrides": {
+      "zod": "4.3.0"
+    }
+  },
   "config": {
     "commitizen": {
       "path": "./.robo-cz/cz.cjs"

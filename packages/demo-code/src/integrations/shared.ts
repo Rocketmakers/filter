@@ -1,16 +1,3 @@
-/**
- * Type shapes shared by every integration example. Structurally identical
- * to what the per-package filter-builder exports — when a developer pastes
- * one of these snippets into their own codebase they'd swap this import
- * for:
- *
- *   import {
- *     type FilterBuilderValue,
- *     type FilterCondition,
- *     filterConditions,
- *   } from "@/components/ui/filter-builder";
- */
-
 export type FilterDataType =
   | "text"
   | "select"
@@ -37,18 +24,11 @@ export type FilterBuilderValue = {
   lockedCondition?: boolean;
 };
 
-/** Minimal registry shape (`{ name, type }` is enough for URL parsing). */
 export type FilterFieldConfig = {
   name: string;
   type: FilterDataType;
 };
 
-/**
- * Stand-ins for the runtime values your real filter-builder exports.
- * Wired up via demo-code's tsconfig path alias so `import { ... } from
- * "@/components/ui/filter-builder"` resolves here at type-check time. In
- * a consumer project the same import resolves to the real implementation.
- */
 export const filterConditions: FilterCondition[] = [];
 
 export declare function useFilteredRows<T>(

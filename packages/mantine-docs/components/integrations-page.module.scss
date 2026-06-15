@@ -1,0 +1,16 @@
+.root {
+  margin-top: 2rem;
+}
+
+.copyPromptDock {
+  position: sticky;
+  bottom: 16px;
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.copyPromptDockInner {
+  pointer-events: auto;
+}

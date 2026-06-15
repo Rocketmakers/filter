@@ -168,8 +168,7 @@ const jsonAll = (eb: EB, col: keyof DB["employees"], pred: ReturnType<typeof sql
 const jsonNone = (eb: EB, col: keyof DB["employees"], pred: ReturnType<typeof sql>): Cond =>
   eb(sql<SqlBool>`NOT EXISTS (SELECT 1 FROM json_each(${sql.ref(col)}) WHERE ${pred})`, "=", true as never);
 
-function idOf(maybe: unknown): unknown {
-  return maybe && typeof maybe === "object" && "id" in maybe
-    ? (maybe as { id: unknown }).id
-    : maybe;
-}
+const hasId = (v: unknown): v is { id: unknown } =>
+  typeof v === "object" && v !== null && "id" in v;
+
+const idOf = (v: unknown): unknown => (hasId(v) ? v.id : v);

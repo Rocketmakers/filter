@@ -42,8 +42,6 @@ export function useFilterParams(
       setSearchParams(
         (prev) => {
           const updated = writeFilterParams(prev, next);
-          // Pre-record what we're about to write so the rehydrate effect
-          // skips re-parsing (which would mint new uuids for every row).
           lastRawRef.current = updated.getAll(FILTER_PARAM).join("|");
           return updated;
         },

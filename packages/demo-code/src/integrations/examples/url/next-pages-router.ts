@@ -47,8 +47,6 @@ export function useFilterParams(
       setFiltersState(next);
       const { [FILTER_PARAM]: _drop, ...rest } = router.query;
       const serialized = serializeFilters(next);
-      // Pre-record what we're about to write so the rehydrate effect
-      // skips re-parsing (which would mint new uuids for every row).
       lastRawRef.current = serialized.join("|");
       const query =
         serialized.length > 0 ? { ...rest, [FILTER_PARAM]: serialized } : rest;

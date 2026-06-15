@@ -131,10 +131,9 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function idOf(maybe: unknown): unknown {
-  return maybe && typeof maybe === "object" && "id" in maybe
-    ? (maybe as { id: unknown }).id
-    : maybe;
-}
+const hasId = (v: unknown): v is { id: unknown } =>
+  typeof v === "object" && v !== null && "id" in v;
+
+const idOf = (v: unknown): unknown => (hasId(v) ? v.id : v);
 
 export { Employee };

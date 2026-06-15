@@ -147,24 +147,27 @@
   align-items: flex-start;
   gap: 0.375rem;
   width: 100%;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  color: var(--mantine-color-dimmed);
+  padding: 0.625rem 0.75rem;
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  color: var(--mantine-color-text);
   text-align: left;
   font: inherit;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: color 120ms ease;
+  transition: color 120ms ease, border-color 120ms ease,
+    background 120ms ease, transform 120ms ease;
 
   &:hover {
-    color: var(--mantine-color-text);
+    border-color: var(--mantine-primary-color-filled);
+    background: var(--mantine-color-default-hover);
+    transform: translateY(-1px);
   }
 
   &:focus-visible {
     outline: 2px solid var(--mantine-primary-color-filled);
     outline-offset: 2px;
-    border-radius: 4px;
   }
 }
 
@@ -178,6 +181,9 @@
   &:hover,
   &:focus-visible {
     color: var(--mantine-color-dimmed);
+    border-color: var(--mantine-color-default-border);
+    background: var(--mantine-color-default);
+    transform: none;
     outline: none;
   }
 

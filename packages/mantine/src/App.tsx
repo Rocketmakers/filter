@@ -21,11 +21,6 @@ import {
   useFilteredRows,
 } from "@/components/ui/filter-builder";
 
-import {
-  BackendIntegrations,
-  OnThisPage,
-} from "./demo/integrations";
-import { IntegrationsStateProvider } from "./demo/integrations/state";
 import { employeeFilters } from "./demo/registry";
 
 import styles from "./App.module.scss";
@@ -66,94 +61,84 @@ export default function App() {
       </header>
 
       <Container size="xl" py="md">
-        <IntegrationsStateProvider>
-        <div className={styles.body}>
-          <Stack gap="xl">
-            <Stack gap="md" id="demo" className={styles.demoSection}>
-              <FilterBuilder
-                id="employee-filter-builder"
-                filters={employeeFilters}
-                value={filters}
-                onChange={setFilters}
-              />
+        <Stack gap="md">
+          <FilterBuilder
+            id="employee-filter-builder"
+            filters={employeeFilters}
+            value={filters}
+            onChange={setFilters}
+          />
 
-              <Table withTableBorder striped highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Name</Table.Th>
-                    <Table.Th>Department</Table.Th>
-                    <Table.Th>Role</Table.Th>
-                    <Table.Th>Skills</Table.Th>
-                    <Table.Th style={{ textAlign: "right" }}>Salary</Table.Th>
-                    <Table.Th>Hired</Table.Th>
-                    <Table.Th>Last login</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {filteredEmployees.length === 0 ? (
-                    <Table.Tr>
-                      <Table.Td colSpan={8} ta="center">
-                        <Text c="dimmed">
-                          No employees match the current filters.
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ) : (
-                    filteredEmployees.map((emp) => (
-                      <Table.Tr key={emp.id}>
-                        <Table.Td>
-                          <Text fw={500}>{emp.name}</Text>
-                          <Text size="xs" c="dimmed">
-                            {emp.email}
-                          </Text>
-                        </Table.Td>
-                        <Table.Td>{emp.department.name}</Table.Td>
-                        <Table.Td>{emp.role}</Table.Td>
-                        <Table.Td>
-                          <Group gap={4} wrap="wrap">
-                            {emp.skills.map((skill) => (
-                              <Badge
-                                key={skill.id}
-                                variant="light"
-                                radius="sm"
-                              >
-                                {skill.name}
-                              </Badge>
-                            ))}
-                          </Group>
-                        </Table.Td>
-                        <Table.Td ta="right">
-                          ${emp.salary.toLocaleString()}
-                        </Table.Td>
-                        <Table.Td>{format(emp.hireDate, "PP")}</Table.Td>
-                        <Table.Td>
-                          <Text c="dimmed" size="sm">
-                            {format(emp.lastLogin, "PP p")}
-                          </Text>
-                        </Table.Td>
-                        <Table.Td>
+          <Table withTableBorder striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Name</Table.Th>
+                <Table.Th>Department</Table.Th>
+                <Table.Th>Role</Table.Th>
+                <Table.Th>Skills</Table.Th>
+                <Table.Th style={{ textAlign: "right" }}>Salary</Table.Th>
+                <Table.Th>Hired</Table.Th>
+                <Table.Th>Last login</Table.Th>
+                <Table.Th>Status</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {filteredEmployees.length === 0 ? (
+                <Table.Tr>
+                  <Table.Td colSpan={8} ta="center">
+                    <Text c="dimmed">
+                      No employees match the current filters.
+                    </Text>
+                  </Table.Td>
+                </Table.Tr>
+              ) : (
+                filteredEmployees.map((emp) => (
+                  <Table.Tr key={emp.id}>
+                    <Table.Td>
+                      <Text fw={500}>{emp.name}</Text>
+                      <Text size="xs" c="dimmed">
+                        {emp.email}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>{emp.department.name}</Table.Td>
+                    <Table.Td>{emp.role}</Table.Td>
+                    <Table.Td>
+                      <Group gap={4} wrap="wrap">
+                        {emp.skills.map((skill) => (
                           <Badge
-                            color={emp.isActive ? "teal" : "gray"}
-                            variant={emp.isActive ? "light" : "outline"}
+                            key={skill.id}
+                            variant="light"
                             radius="sm"
                           >
-                            {emp.isActive ? "Active" : "Inactive"}
+                            {skill.name}
                           </Badge>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))
-                  )}
-                </Table.Tbody>
-              </Table>
-            </Stack>
-
-            <BackendIntegrations />
-          </Stack>
-
-          <OnThisPage />
-        </div>
-        </IntegrationsStateProvider>
+                        ))}
+                      </Group>
+                    </Table.Td>
+                    <Table.Td ta="right">
+                      ${emp.salary.toLocaleString()}
+                    </Table.Td>
+                    <Table.Td>{format(emp.hireDate, "PP")}</Table.Td>
+                    <Table.Td>
+                      <Text c="dimmed" size="sm">
+                        {format(emp.lastLogin, "PP p")}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge
+                        color={emp.isActive ? "teal" : "gray"}
+                        variant={emp.isActive ? "light" : "outline"}
+                        radius="sm"
+                      >
+                        {emp.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </Table.Td>
+                  </Table.Tr>
+                ))
+              )}
+            </Table.Tbody>
+          </Table>
+        </Stack>
       </Container>
     </div>
   );

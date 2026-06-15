@@ -53,8 +53,6 @@ export function useFilterParams(
     (next: FilterBuilderValue[]) => {
       setFiltersState(next);
       const serialized = serializeFilters(next);
-      // Pre-record what we're about to write so the rehydrate effect
-      // skips re-parsing (which would mint new uuids for every row).
       lastRawRef.current = serialized.join("|");
       navigate({
         search: (prev: z.infer<typeof searchSchema>) => ({

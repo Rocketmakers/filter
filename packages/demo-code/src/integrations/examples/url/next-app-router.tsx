@@ -47,8 +47,6 @@ export function useFilterParams(
         new URLSearchParams(searchParams.toString()),
         next,
       );
-      // Pre-record what we're about to write so the rehydrate effect
-      // skips re-parsing (which would mint new uuids for every row).
       lastRawRef.current = params.getAll(FILTER_PARAM).join("|");
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });

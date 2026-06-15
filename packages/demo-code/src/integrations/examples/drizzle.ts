@@ -167,8 +167,7 @@ const jsonAll = (col: AnyColumn, pred: SQL) =>
 const jsonNone = (col: AnyColumn, pred: SQL) =>
   sql`NOT EXISTS (SELECT 1 FROM json_each(${col}) WHERE ${pred})`;
 
-function idOf(maybe: unknown): unknown {
-  return maybe && typeof maybe === "object" && "id" in maybe
-    ? (maybe as { id: unknown }).id
-    : maybe;
-}
+const hasId = (v: unknown): v is { id: unknown } =>
+  typeof v === "object" && v !== null && "id" in v;
+
+const idOf = (v: unknown): unknown => (hasId(v) ? v.id : v);
