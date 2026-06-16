@@ -8,6 +8,7 @@
     "dev:tw": "pnpm -C packages/tailwind dev",
     "dev:mantine": "pnpm -C packages/mantine dev",
     "dev:stylex": "pnpm -C packages/stylex dev",
+    "dev:docs": "pnpm -C packages/docs dev",
     "build": "pnpm -r build",
     "build:registry": "shadcn build registry.json --output ./registry-dist/r",
     "lint": "pnpm -r lint",

@@ -17,16 +17,16 @@ import { MantineRoot } from "./providers";
 
 export const metadata = {
   title: {
-    default: "filter-builder · Mantine",
-    template: "%s · filter-builder · Mantine",
+    default: "filter-builder",
+    template: "%s · filter-builder",
   },
   description:
-    "Mantine v8 + .module.scss variant of the shadcn-style filter builder.",
+    "A shadcn-style filter builder, ported across Mantine, Style-X, and Tailwind (shadcn) variants.",
 };
 
 const navbar = (
   <Navbar
-    logo={<b>filter-builder · Mantine</b>}
+    logo={<b>filter-builder</b>}
     projectLink="https://github.com/rocketmakers/filter-builder"
   />
 );
@@ -51,7 +51,7 @@ export default async function RootLayout({
         <Layout
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/rocketmakers/filter-builder/tree/main/packages/mantine-docs"
+          docsRepositoryBase="https://github.com/rocketmakers/filter-builder/tree/main/packages/docs"
           footer={footer}
           sidebar={{ defaultMenuCollapseLevel: 1 }}
           toc={{ backToTop: null }}
