@@ -1,0 +1,14 @@
+.toggleBadge {
+  cursor: pointer;
+}
+
+.groupBoxMulti {
+  border-color: var(--mantine-color-green-3);
+}
+
+.addGroupButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}

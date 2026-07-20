@@ -19,7 +19,7 @@ import typescript from "highlight.js/lib/languages/typescript";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import App from "./App";
+import Root from "./Root";
 import { mantineTheme } from "./theme/mantineTheme";
 
 hljs.registerLanguage("ts", typescript);
@@ -36,7 +36,7 @@ createRoot(document.getElementById("root")!).render(
       <CodeHighlightAdapterProvider adapter={codeHighlightAdapter}>
         <DatesProvider settings={{ locale: "en-gb" }}>
           <Notifications position="top-right" />
-          <App />
+          <Root />
         </DatesProvider>
       </CodeHighlightAdapterProvider>
     </MantineProvider>

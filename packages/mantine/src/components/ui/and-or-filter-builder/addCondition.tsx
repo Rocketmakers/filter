@@ -1,0 +1,243 @@
+/* ------------------------------------------------------------------ */
+/* Add / edit condition popover form                                  */
+/* ------------------------------------------------------------------ */
+
+import { useState } from "react";
+import {
+  Button,
+  MultiSelect,
+  NumberInput,
+  Popover,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+  UnstyledButton,
+} from "@mantine/core";
+import { DateInput } from "@mantine/dates";
+
+import { cn } from "@/lib/class-names";
+
+import {
+  defaultOperatorFor,
+  fieldByName,
+  operatorIsMultiple,
+  operatorNeedsValue,
+  operatorsForField,
+  type Condition,
+  type FieldDef,
+  type Operator,
+} from "./types";
+
+import styles from "./addCondition.module.scss";
+
+interface AddConditionProps {
+  fields: FieldDef[];
+  /** when provided, the form opens pre-filled to edit this condition instead of creating a new one */
+  initial?: Condition;
+  onSubmit: (c: Omit<Condition, "id">) => void;
+  children: React.ReactNode; // the trigger
+  /** "subtle" drops the default button chrome — used when the trigger IS the condition chip itself */
+  variant?: "subtle";
+  size?: "sm" | "compact-sm";
+  title?: string;
+}
+
+export function AddCondition({
+  fields,
+  initial,
+  onSubmit,
+  children,
+  variant,
+  size,
+  title,
+}: AddConditionProps) {
+  const isEditing = Boolean(initial);
+  const [open, setOpen] = useState(false);
+  const [field, setField] = useState(initial?.field ?? fields[0]?.value ?? "");
+  const [op, setOp] = useState<Operator>(initial?.op ?? defaultOperatorFor(fields[0]));
+  const [values, setValues] = useState<string[]>(initial?.values ?? []);
+
+  const selectedField = fieldByName(fields, field);
+  const operators = operatorsForField(selectedField);
+  const needsValue = operatorNeedsValue(selectedField, op);
+  const multiple = operatorIsMultiple(selectedField, op);
+
+  const reset = () => {
+    setField(fields[0]?.value ?? "");
+    setOp(defaultOperatorFor(fields[0]));
+    setValues([]);
+  };
+
+  const submit = () => {
+    onSubmit({ field, op, values: needsValue ? values : [] });
+    // editing leaves the form showing the just-saved condition; adding clears it for the next one
+    if (!isEditing) reset();
+    setOpen(false);
+  };
+
+  const selectField = (name: string) => {
+    setField(name);
+    setOp(defaultOperatorFor(fieldByName(fields, name)));
+    setValues([]);
+  };
+
+  const selectOperator = (nextOp: Operator) => {
+    setOp(nextOp);
+    // switching between single- and multi-value operators would otherwise
+    // leave a stale single value selected under a multi-select widget, or vice versa
+    setValues([]);
+  };
+
+  return (
+    <Popover
+      opened={open}
+      onChange={setOpen}
+      position="bottom-start"
+      shadow="md"
+      width={320}
+      withArrow
+    >
+      <Popover.Target>
+        <UnstyledButton
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className={cn(
+            styles.trigger,
+            variant === "subtle" && styles.triggerSubtle,
+            size === "compact-sm" && styles.triggerCompact,
+          )}
+          title={title}
+        >
+          {children}
+        </UnstyledButton>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <Stack gap="sm">
+          <Text fw={600} size="sm">
+            {isEditing ? "Edit condition" : "Add condition"}
+          </Text>
+          <Select
+            label="Field"
+            data={fields}
+            value={field}
+            onChange={(v) => v && selectField(v)}
+            allowDeselect={false}
+            comboboxProps={{ withinPortal: false }}
+          />
+          <Select
+            label="Condition"
+            data={operators.map((o) => ({ value: o.value, label: o.label }))}
+            value={op}
+            onChange={(v) => v && selectOperator(v as Operator)}
+            allowDeselect={false}
+            comboboxProps={{ withinPortal: false }}
+          />
+          {needsValue && (
+            <ValueInput
+              field={selectedField}
+              multiple={multiple}
+              values={values}
+              onChange={setValues}
+              onSubmit={submit}
+            />
+          )}
+          <Button color="green" fullWidth onClick={submit}>
+            {isEditing ? "Save changes" : "Add filter"}
+          </Button>
+        </Stack>
+      </Popover.Dropdown>
+    </Popover>
+  );
+}
+
+interface ValueInputProps {
+  field: FieldDef | undefined;
+  multiple: boolean;
+  values: string[];
+  onChange: (v: string[]) => void;
+  onSubmit: () => void;
+}
+
+/** The value widget is chosen by the field's type — a number field gets a
+ * NumberInput, a date field a DateInput, a select/boolean field a picklist
+ * (MultiSelect for "is one of" / "is none of"), and everything else a plain
+ * TextInput. */
+function ValueInput({ field, multiple, values, onChange, onSubmit }: ValueInputProps) {
+  const value = values[0] ?? "";
+  const setSingle = (v: string) => onChange(v ? [v] : []);
+
+  if (field?.type === "select" && multiple) {
+    return (
+      <MultiSelect
+        label="Value"
+        placeholder="Select values…"
+        data={field.options ?? []}
+        value={values}
+        onChange={onChange}
+        comboboxProps={{ withinPortal: false }}
+        searchable
+        data-autofocus
+      />
+    );
+  }
+
+  switch (field?.type) {
+    case "number":
+      return (
+        <NumberInput
+          label="Value"
+          placeholder="Enter value…"
+          value={value === "" ? "" : Number(value)}
+          onChange={(v) => setSingle(v === "" ? "" : String(v))}
+          data-autofocus
+        />
+      );
+    case "date":
+      return (
+        <DateInput
+          label="Value"
+          placeholder="Pick a date…"
+          value={value ? new Date(value) : null}
+          onChange={(v) => setSingle(v ? new Date(v).toISOString() : "")}
+          data-autofocus
+        />
+      );
+    case "boolean":
+      return (
+        <Select
+          label="Value"
+          data={[
+            { value: "true", label: "Yes" },
+            { value: "false", label: "No" },
+          ]}
+          value={value || null}
+          onChange={(v) => setSingle(v ?? "")}
+          allowDeselect={false}
+          comboboxProps={{ withinPortal: false }}
+        />
+      );
+    case "select":
+      return (
+        <Select
+          label="Value"
+          data={field.options ?? []}
+          value={value || null}
+          onChange={(v) => setSingle(v ?? "")}
+          allowDeselect={false}
+          comboboxProps={{ withinPortal: false }}
+        />
+      );
+    default:
+      return (
+        <TextInput
+          label="Value"
+          placeholder="Enter value…"
+          value={value}
+          onChange={(e) => setSingle(e.currentTarget.value)}
+          onKeyDown={(e) => e.key === "Enter" && onSubmit()}
+          data-autofocus
+        />
+      );
+  }
+}
