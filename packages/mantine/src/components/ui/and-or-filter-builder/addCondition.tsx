@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------ */
-/* Add-condition popover form                                         */
+/* Add / edit condition popover form                                  */
 /* ------------------------------------------------------------------ */
 
 import { useState } from "react";
@@ -12,8 +12,11 @@ import {
   Stack,
   Text,
   TextInput,
+  UnstyledButton,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
+
+import { cn } from "@/lib/class-names";
 
 import {
   defaultOperatorFor,
@@ -26,19 +29,34 @@ import {
   type Operator,
 } from "./types";
 
-import styles from "./add-condition.module.scss";
+import styles from "./addCondition.module.scss";
 
 interface AddConditionProps {
   fields: FieldDef[];
-  onAdd: (c: Omit<Condition, "id">) => void;
+  /** when provided, the form opens pre-filled to edit this condition instead of creating a new one */
+  initial?: Condition;
+  onSubmit: (c: Omit<Condition, "id">) => void;
   children: React.ReactNode; // the trigger
+  /** "subtle" drops the default button chrome — used when the trigger IS the condition chip itself */
+  variant?: "subtle";
+  size?: "sm" | "compact-sm";
+  title?: string;
 }
 
-export function AddCondition({ fields, onAdd, children }: AddConditionProps) {
+export function AddCondition({
+  fields,
+  initial,
+  onSubmit,
+  children,
+  variant,
+  size,
+  title,
+}: AddConditionProps) {
+  const isEditing = Boolean(initial);
   const [open, setOpen] = useState(false);
-  const [field, setField] = useState(fields[0]?.value ?? "");
-  const [op, setOp] = useState<Operator>(defaultOperatorFor(fields[0]));
-  const [values, setValues] = useState<string[]>([]);
+  const [field, setField] = useState(initial?.field ?? fields[0]?.value ?? "");
+  const [op, setOp] = useState<Operator>(initial?.op ?? defaultOperatorFor(fields[0]));
+  const [values, setValues] = useState<string[]>(initial?.values ?? []);
 
   const selectedField = fieldByName(fields, field);
   const operators = operatorsForField(selectedField);
@@ -52,8 +70,9 @@ export function AddCondition({ fields, onAdd, children }: AddConditionProps) {
   };
 
   const submit = () => {
-    onAdd({ field, op, values: needsValue ? values : [] });
-    reset();
+    onSubmit({ field, op, values: needsValue ? values : [] });
+    // editing leaves the form showing the just-saved condition; adding clears it for the next one
+    if (!isEditing) reset();
     setOpen(false);
   };
 
@@ -80,14 +99,23 @@ export function AddCondition({ fields, onAdd, children }: AddConditionProps) {
       withArrow
     >
       <Popover.Target>
-        <span onClick={() => setOpen((o) => !o)} className={styles.trigger}>
+        <UnstyledButton
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className={cn(
+            styles.trigger,
+            variant === "subtle" && styles.triggerSubtle,
+            size === "compact-sm" && styles.triggerCompact,
+          )}
+          title={title}
+        >
           {children}
-        </span>
+        </UnstyledButton>
       </Popover.Target>
       <Popover.Dropdown>
         <Stack gap="sm">
           <Text fw={600} size="sm">
-            Add condition
+            {isEditing ? "Edit condition" : "Add condition"}
           </Text>
           <Select
             label="Field"
@@ -115,7 +143,7 @@ export function AddCondition({ fields, onAdd, children }: AddConditionProps) {
             />
           )}
           <Button color="green" fullWidth onClick={submit}>
-            Add filter
+            {isEditing ? "Save changes" : "Add filter"}
           </Button>
         </Stack>
       </Popover.Dropdown>

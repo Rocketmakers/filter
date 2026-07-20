@@ -1,0 +1,31 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-xs);
+  cursor: pointer;
+  color: inherit;
+  background: var(--mantine-color-body);
+
+  &:hover {
+    background: var(--mantine-color-default-hover);
+  }
+}
+
+/* used when the trigger IS the condition chip itself — the chip's own Paper
+ * already provides the border/background, so the button chrome would double up */
+.triggerSubtle {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+
+  &:hover {
+    background: var(--mantine-color-default-hover);
+  }
+}
+
+.triggerCompact {
+  padding: 2px;
+}

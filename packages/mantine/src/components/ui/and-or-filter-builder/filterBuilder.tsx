@@ -10,7 +10,7 @@
  *   • Evaluation is a plain left-to-right fold (no operator precedence).
  *
  * The component is CONTROLLED: pass `value` + `onChange`.
- * Matching / query-string helpers live in ./apply-filter so the same
+ * Matching / query-string helpers live in ./applyFilter so the same
  * query object can drive your table.
  *
  * Usage:
@@ -19,11 +19,11 @@
  *   const rows = allRows.filter(r => matchQuery(r, query, FIELDS));
  */
 
-import { Group, Button, Badge, Paper, ActionIcon, Text, Stack, Code } from "@mantine/core";
+import { ActionIcon, Badge, Code, Group, Paper, Stack, Text } from "@mantine/core";
 import { FilterIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 
-import { AddCondition } from "./add-condition";
-import { buildQueryString, describeValues } from "./apply-filter";
+import { AddCondition } from "./addCondition";
+import { buildQueryString, describeValues } from "./applyFilter";
 import {
   fieldByName,
   operatorLabel,
@@ -35,7 +35,7 @@ import {
   type Join,
 } from "./types";
 
-import styles from "./filter-builder.module.scss";
+import styles from "./filterBuilder.module.scss";
 
 export interface FilterBuilderProps {
   value: FilterQuery;
@@ -133,6 +133,16 @@ export function FilterBuilder({
     if (idx !== -1) removeGroupAt(idx);
   };
 
+  const updateCondition = (gid: string, cid: string, next: Omit<Condition, "id">) =>
+    onChange({
+      ...value,
+      groups: groups.map((g) =>
+        g.id === gid
+          ? { ...g, conditions: g.conditions.map((c) => (c.id === cid ? { ...next, id: c.id } : c)) }
+          : g,
+      ),
+    });
+
   const labelOf = (v: string) => fields.find((f) => f.value === v)?.label ?? v;
   const preview = buildQueryString(value, fields);
 
@@ -190,30 +200,41 @@ export function FilterBuilder({
                           {g.joins[ci - 1]}
                         </Badge>
                       )}
-                      {/* chip */}
+                      {/* chip — click to edit, X to remove */}
                       <Paper withBorder radius="md" px="xs" py={6}>
                         <Group gap={8} align="center" wrap="nowrap">
-                          <Text fw={600} size="sm">
-                            {labelOf(c.field)}
-                          </Text>
-                          <Code>{operatorLabel(fieldByName(fields, c.field), c.op)}</Code>
-                          {operatorNeedsValue(fieldByName(fields, c.field), c.op) &&
-                            c.values.length > 0 &&
-                            (c.values.length > 1 ? (
-                              <Group gap={4} wrap="nowrap">
-                                {describeValues(fieldByName(fields, c.field), c.values).map(
-                                  (v, i) => (
-                                    <Badge key={i} variant="light" color="gray" radius="sm">
-                                      {v}
-                                    </Badge>
-                                  ),
-                                )}
-                              </Group>
-                            ) : (
-                              <Text size="sm">
-                                {describeValues(fieldByName(fields, c.field), c.values)[0]}
+                          <AddCondition
+                            fields={fields}
+                            initial={c}
+                            onSubmit={(next) => updateCondition(g.id, c.id, next)}
+                            variant="subtle"
+                            size="compact-sm"
+                            title="Edit condition"
+                          >
+                            <Group gap={8} align="center" wrap="nowrap">
+                              <Text fw={600} size="sm">
+                                {labelOf(c.field)}
                               </Text>
-                            ))}
+                              <Code>{operatorLabel(fieldByName(fields, c.field), c.op)}</Code>
+                              {operatorNeedsValue(fieldByName(fields, c.field), c.op) &&
+                                c.values.length > 0 &&
+                                (c.values.length > 1 ? (
+                                  <Group gap={4} wrap="nowrap">
+                                    {describeValues(fieldByName(fields, c.field), c.values).map(
+                                      (v, i) => (
+                                        <Badge key={i} variant="light" color="gray" radius="sm">
+                                          {v}
+                                        </Badge>
+                                      ),
+                                    )}
+                                  </Group>
+                                ) : (
+                                  <Text size="sm">
+                                    {describeValues(fieldByName(fields, c.field), c.values)[0]}
+                                  </Text>
+                                ))}
+                            </Group>
+                          </AddCondition>
                           <ActionIcon
                             variant="subtle"
                             color="gray"
@@ -229,10 +250,12 @@ export function FilterBuilder({
                   ))}
 
                   {/* add condition to this group */}
-                  <AddCondition fields={fields} onAdd={(c) => addConditionToGroup(g.id, c)}>
-                    <ActionIcon variant="default" radius="md" title="Add condition to group">
-                      <PlusIcon size={16} />
-                    </ActionIcon>
+                  <AddCondition
+                    fields={fields}
+                    onSubmit={(c) => addConditionToGroup(g.id, c)}
+                    title="Add condition to group"
+                  >
+                    <PlusIcon size={16} />
                   </AddCondition>
 
                   {multi && (
@@ -260,14 +283,12 @@ export function FilterBuilder({
         })}
 
         {/* add group */}
-        <AddCondition fields={fields} onAdd={addGroupWithCondition}>
-          <Button
-            variant="default"
-            leftSection={<PlusIcon size={16} />}
-            rightSection={groups.length === 0 ? <FilterIcon size={16} /> : undefined}
-          >
+        <AddCondition fields={fields} onSubmit={addGroupWithCondition}>
+          <div className={styles.addGroupButton}>
+            <PlusIcon size={16} />
             {groups.length === 0 ? "Filter" : "Add group"}
-          </Button>
+            {groups.length === 0 && <FilterIcon size={16} />}
+          </div>
         </AddCondition>
       </Group>
 
